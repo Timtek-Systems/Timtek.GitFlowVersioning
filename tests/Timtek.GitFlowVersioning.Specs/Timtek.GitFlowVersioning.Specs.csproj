@@ -18,6 +18,5 @@
     <PackageReference Include="Machine.Specifications.Runner.VisualStudio" />
     <PackageReference Include="Machine.Specifications.Should" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 </Project>

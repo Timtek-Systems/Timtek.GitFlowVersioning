@@ -131,7 +131,7 @@ public static class VersionCalculator
             var parsedVersion = Version.Parse(clean);
             return new Version(parsedVersion.Major, parsedVersion.Minor, parsedVersion.Build < 0 ? 0 : parsedVersion.Build);
         }
-        catch (Exception)
+        catch (Exception ex) when (ex is FormatException or ArgumentException or OverflowException)
         {
             return FallbackVersion;
         }

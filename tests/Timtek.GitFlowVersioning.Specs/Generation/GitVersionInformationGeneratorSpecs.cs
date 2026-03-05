@@ -82,3 +82,42 @@ class when_generating_git_version_information_for_alpha_prerelease
     It should_contain_prerelease_tag = () => result.ShouldContain("public const string PreReleaseTag = \"alpha.7\";");
     It should_contain_semver_with_prerelease = () => result.ShouldContain("public const string SemVer = \"1.3.0-alpha.7\";");
 }
+
+[Subject(typeof(GitVersionInformationGenerator), "string escaping")]
+class when_generating_git_version_information_with_branch_name_containing_special_characters
+{
+    static VersionInfo versionInfo = null!;
+    static string result = null!;
+
+    Establish context = () => versionInfo = new VersionInfo
+    {
+        Major = "1",
+        Minor = "0",
+        Patch = "0",
+        MajorMinorPatch = "1.0.0",
+        PreReleaseLabel = "alpha",
+        PreReleaseLabelWithDash = "-alpha",
+        PreReleaseNumber = "1",
+        PreReleaseTag = "alpha.1",
+        PreReleaseTagWithDash = "-alpha.1",
+        SemVer = "1.0.0-alpha.1",
+        FullSemVer = "1.0.0-alpha.1+1",
+        BranchName = "feature/test\"branch",
+        EscapedBranchName = "feature-test\"branch",
+        Sha = "abc123",
+        ShortSha = "abc123",
+        BuildMetaData = "1",
+        FullBuildMetaData = "1.Branch.feature-test-branch.Sha.abc123",
+        InformationalVersion = "1.0.0-alpha.1+1.Branch.feature-test\\branch.Sha.abc123",
+        AssemblySemVer = "1.0.0.0",
+        AssemblySemFileVer = "1.0.0.0"
+    };
+
+    Because of = () => result = GitVersionInformationGenerator.Generate(versionInfo);
+
+    It should_produce_compilable_csharp_by_escaping_double_quotes =
+        () => result.ShouldContain("public const string BranchName = \"feature/test\\\"branch\";");
+
+    It should_escape_backslash_in_informational_version =
+        () => result.ShouldContain("public const string InformationalVersion = \"1.0.0-alpha.1+1.Branch.feature-test\\\\branch.Sha.abc123\";");
+}
