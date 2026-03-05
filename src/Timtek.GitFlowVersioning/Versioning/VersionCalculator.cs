@@ -126,9 +126,9 @@ public static class VersionCalculator
             return FallbackVersion;
 
         var clean = tag.TrimStart('v', 'V');
-        Version? v;
-        if (Version.TryParse(clean, out v))
-            return new Version(v.Major, v.Minor, v.Build < 0 ? 0 : v.Build);
+        Version? parsedVersion;
+        if (Version.TryParse(clean, out parsedVersion))
+            return new Version(parsedVersion.Major, parsedVersion.Minor, parsedVersion.Build < 0 ? 0 : parsedVersion.Build);
         return FallbackVersion;
     }
 }

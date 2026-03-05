@@ -3,7 +3,7 @@ using Timtek.GitFlowVersioning.Versioning;
 
 namespace Timtek.GitFlowVersioning.Specs.Versioning;
 
-class With_version_calculator_context
+class With_version_calculator
 {
     protected static GitCommitInfo CommitInfo = null!;
     protected static VersionInfo Result = null!;
@@ -20,7 +20,7 @@ class With_version_calculator_context
 }
 
 [Subject(typeof(VersionCalculator), "main branch at tagged commit")]
-class when_computing_version_for_main_branch_at_exact_tag : With_version_calculator_context
+class when_computing_version_for_main_branch_at_exact_tag : With_version_calculator
 {
     Establish context = () => CommitInfo = BuildCommitInfo("main", "1.2.3", distance: 0);
     Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
@@ -34,7 +34,7 @@ class when_computing_version_for_main_branch_at_exact_tag : With_version_calcula
 }
 
 [Subject(typeof(VersionCalculator), "main branch ahead of tag")]
-class when_computing_version_for_main_branch_5_commits_ahead_of_tag : With_version_calculator_context
+class when_computing_version_for_main_branch_5_commits_ahead_of_tag : With_version_calculator
 {
     Establish context = () => CommitInfo = BuildCommitInfo("main", "1.2.3", distance: 5);
     Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
@@ -44,7 +44,7 @@ class when_computing_version_for_main_branch_5_commits_ahead_of_tag : With_versi
 }
 
 [Subject(typeof(VersionCalculator), "develop branch")]
-class when_computing_version_for_develop_branch : With_version_calculator_context
+class when_computing_version_for_develop_branch : With_version_calculator
 {
     Establish context = () => CommitInfo = BuildCommitInfo("develop", "1.2.3", distance: 7);
     Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
@@ -56,7 +56,7 @@ class when_computing_version_for_develop_branch : With_version_calculator_contex
 }
 
 [Subject(typeof(VersionCalculator), "release branch")]
-class when_computing_version_for_release_branch : With_version_calculator_context
+class when_computing_version_for_release_branch : With_version_calculator
 {
     Establish context = () => CommitInfo = BuildCommitInfo("release/1.3.0", "1.2.3", distance: 3);
     Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
@@ -66,7 +66,7 @@ class when_computing_version_for_release_branch : With_version_calculator_contex
 }
 
 [Subject(typeof(VersionCalculator), "hotfix branch")]
-class when_computing_version_for_hotfix_branch : With_version_calculator_context
+class when_computing_version_for_hotfix_branch : With_version_calculator
 {
     Establish context = () => CommitInfo = BuildCommitInfo("hotfix/fix-critical", "1.2.3", distance: 2);
     Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
@@ -76,7 +76,7 @@ class when_computing_version_for_hotfix_branch : With_version_calculator_context
 }
 
 [Subject(typeof(VersionCalculator), "feature branch")]
-class when_computing_version_for_feature_branch : With_version_calculator_context
+class when_computing_version_for_feature_branch : With_version_calculator
 {
     Establish context = () => CommitInfo = BuildCommitInfo("feature/my-feature", "1.2.3", distance: 10);
     Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
@@ -86,7 +86,7 @@ class when_computing_version_for_feature_branch : With_version_calculator_contex
 }
 
 [Subject(typeof(VersionCalculator), "escaped branch name")]
-class when_computing_version_for_feature_branch_with_slash : With_version_calculator_context
+class when_computing_version_for_feature_branch_with_slash : With_version_calculator
 {
     Establish context = () => CommitInfo = BuildCommitInfo("feature/foo", "1.0.0", distance: 1);
     Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
@@ -95,7 +95,7 @@ class when_computing_version_for_feature_branch_with_slash : With_version_calcul
 }
 
 [Subject(typeof(VersionCalculator), "short SHA")]
-class when_computing_version_sha_fields_are_populated : With_version_calculator_context
+class when_computing_version_sha_fields_are_populated : With_version_calculator
 {
     Establish context = () => CommitInfo = BuildCommitInfo("main", "1.0.0", distance: 0);
     Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
@@ -104,7 +104,7 @@ class when_computing_version_sha_fields_are_populated : With_version_calculator_
 }
 
 [Subject(typeof(VersionCalculator), "fallback version when no tag")]
-class when_computing_version_with_fallback_base_version : With_version_calculator_context
+class when_computing_version_with_fallback_base_version : With_version_calculator
 {
     Establish context = () => CommitInfo = new GitCommitInfo
     {
