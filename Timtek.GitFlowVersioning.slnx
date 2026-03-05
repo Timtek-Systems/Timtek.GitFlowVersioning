@@ -1,8 +1,2 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="src/Timtek.GitFlowVersioning/Timtek.GitFlowVersioning.csproj" />
-  </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/Timtek.GitFlowVersioning.Specs/Timtek.GitFlowVersioning.Specs.csproj" />
-  </Folder>
 </Solution>
