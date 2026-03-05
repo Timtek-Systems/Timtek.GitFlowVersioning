@@ -25,16 +25,16 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.x
+          dotnet-version: 9.x
 
       - name: Restore
-        run: dotnet restore
+        run: dotnet restore Timtek.GitFlowVersioning.slnx
 
       - name: Build
-        run: dotnet build --no-restore --configuration ${{ env.CONFIGURATION }}
+        run: dotnet build Timtek.GitFlowVersioning.slnx --no-restore --configuration ${{ env.CONFIGURATION }}
 
       - name: Test
-        run: dotnet test --no-build --configuration ${{ env.CONFIGURATION }} --logger trx --results-directory TestResults
+        run: dotnet test Timtek.GitFlowVersioning.slnx --no-build --configuration ${{ env.CONFIGURATION }} --logger trx --results-directory TestResults
 
       - name: Upload test results
         if: always()
@@ -44,7 +44,7 @@ jobs:
           path: TestResults/*.trx
 
       - name: Pack
-        run: dotnet pack --no-build --configuration ${{ env.CONFIGURATION }} --output nupkgs
+        run: dotnet pack src/Timtek.GitFlowVersioning/Timtek.GitFlowVersioning.csproj --no-build --configuration ${{ env.CONFIGURATION }} --output nupkgs
 
       - name: Upload NuGet packages
         uses: actions/upload-artifact@v4
