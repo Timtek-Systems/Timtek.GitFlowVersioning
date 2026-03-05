@@ -18,7 +18,7 @@ Learn more: <https://code.visualstudio.com/docs/copilot/customization/custom-ins
 - Use `var` for local variable declarations when the type is obvious from the right-hand side.
 - Avoid `out` parameters in C#, outputs should be via the function return. If necessary, define a DTO class to contain the result.
 - Avoid `Try*` methods where the result is returned through an `out` parameter. For existing methods such as `TryParse()`, use the `Parse()` method instead and handle any exceptions or null results. For new code, return a `Maybe<T>` (`TA.Utils.Core` nuget) and check whether the result is empty using the .IsEmpty property.
-- Avoid using `object`, `object[]`, or casts to `object`** - this is a code smell. 
+- Avoid using `object`, `object[]`, or casts to `object` - this is a code smell. 
 
 # Clean Code Guidelines
 
@@ -41,7 +41,8 @@ It is important that code is kept simple and easy to read and understand. The fo
 - Use constructor injection wherever possible. Avoid property injection unless absolutely necessary.
 - Avoid the Service Locator pattern.
 - Use the `TimeProvider` abstraction for accessing the current time instead of directly calling `DateTime.Now` or `DateTime.UtcNow`. This improves testability by allowing time to be mocked or controlled in unit tests.
-- Use the `IFileSystem` abstraction from the  NuGet package for all file system interactions instead of directly using `System.IO` classes. This enhances testability by allowing file system operations to be mocked or simulated in unit tests.
+- Use the `IFileSystem` abstraction from the NuGet package for all file system interactions instead of directly using `System.IO` classes. This enhances testability by allowing file system operations to be mocked or simulated in unit tests.
+
 # Testing
 
 - Generate unit specs for all new code, using the MSpec framework.
@@ -206,3 +207,7 @@ The `.Property()` approach:
 
 - Use appropriate log levels (Trace, Debug, Info, Warn, Error, Fatal) based on the severity and importance of the log message.
 - In unit tests where an `ILog` instance is needed, prefer to pass in a `ConsoleLoggerService` configured with the option `RenderProperties = false` rather than a fake logger. This ensures that log messages are output to the console during test execution, aiding in debugging and visibility of log output without the need for complex mocking setups.
+
+# Versioning Conventions
+
+- Git release tags use bare semantic versions (e.g., "1.0.0") without a "v" prefix.
