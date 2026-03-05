@@ -13,7 +13,7 @@
              Condition="'$(_GitFlowVersioningTaskAssembly)' != ''" />
 
   <Target Name="_ComputeGitFlowVersion"
-          BeforeTargets="CoreCompile;GenerateAssemblyInfo;BeforeBuild;Pack"
+          BeforeTargets="CoreCompile;GenerateAssemblyInfo;BeforeBuild;GenerateNuspec"
           Condition="'$(GitFlowVersioningEnabled)' == 'true' And '$(DesignTimeBuild)' != 'true' And '$(_GitFlowVersioningTaskAssembly)' != ''">
 
     <MakeDir Directories="$(IntermediateOutputPath)" />
