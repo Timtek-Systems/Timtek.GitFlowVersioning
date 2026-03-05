@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <GitFlowVersioningEnabled Condition="'$(GitFlowVersioningEnabled)' == ''">true</GitFlowVersioningEnabled>
+    <!-- Path to task assembly: in NuGet package it's in tasks/netstandard2.0/ relative to this file's parent -->
+    <_GitFlowVersioningTaskAssembly Condition="Exists('$(MSBuildThisFileDirectory)..\tasks\netstandard2.0\Timtek.GitFlowVersioning.dll')">$(MSBuildThisFileDirectory)..\tasks\netstandard2.0\Timtek.GitFlowVersioning.dll</_GitFlowVersioningTaskAssembly>
+    <!-- Dev fallback: look in output folder of the csproj -->
+    <_GitFlowVersioningTaskAssembly Condition="'$(_GitFlowVersioningTaskAssembly)' == '' And Exists('$(MSBuildThisFileDirectory)..\src\Timtek.GitFlowVersioning\bin\Debug\netstandard2.0\Timtek.GitFlowVersioning.dll')">$(MSBuildThisFileDirectory)..\src\Timtek.GitFlowVersioning\bin\Debug\netstandard2.0\Timtek.GitFlowVersioning.dll</_GitFlowVersioningTaskAssembly>
+  </PropertyGroup>
+
+  <UsingTask TaskName="Timtek.GitFlowVersioning.Tasks.ComputeGitFlowVersionTask"
+             AssemblyFile="$(_GitFlowVersioningTaskAssembly)"
+             Condition="'$(_GitFlowVersioningTaskAssembly)' != ''" />
+
+  <Target Name="_ComputeGitFlowVersion"
+          BeforeTargets="CoreCompile;GenerateAssemblyInfo;BeforeBuild;Pack"
+          Condition="'$(GitFlowVersioningEnabled)' == 'true' And '$(DesignTimeBuild)' != 'true' And '$(_GitFlowVersioningTaskAssembly)' != ''">
+
+    <MakeDir Directories="$(IntermediateOutputPath)" />
+
+    <ComputeGitFlowVersionTask
+        ProjectDirectory="$(MSBuildProjectDirectory)"
+        IntermediateOutputPath="$(IntermediateOutputPath)">
+      <Output TaskParameter="Major" PropertyName="_GFV_Major" />
+      <Output TaskParameter="Minor" PropertyName="_GFV_Minor" />
+      <Output TaskParameter="Patch" PropertyName="_GFV_Patch" />
+      <Output TaskParameter="MajorMinorPatch" PropertyName="_GFV_MajorMinorPatch" />
+      <Output TaskParameter="PreReleaseLabel" PropertyName="_GFV_PreReleaseLabel" />
+      <Output TaskParameter="PreReleaseLabelWithDash" PropertyName="_GFV_PreReleaseLabelWithDash" />
+      <Output TaskParameter="PreReleaseNumber" PropertyName="_GFV_PreReleaseNumber" />
+      <Output TaskParameter="PreReleaseTag" PropertyName="_GFV_PreReleaseTag" />
+      <Output TaskParameter="PreReleaseTagWithDash" PropertyName="_GFV_PreReleaseTagWithDash" />
+      <Output TaskParameter="SemVer" PropertyName="_GFV_SemVer" />
+      <Output TaskParameter="FullSemVer" PropertyName="_GFV_FullSemVer" />
+      <Output TaskParameter="BranchName" PropertyName="_GFV_BranchName" />
+      <Output TaskParameter="EscapedBranchName" PropertyName="_GFV_EscapedBranchName" />
+      <Output TaskParameter="Sha" PropertyName="_GFV_Sha" />
+      <Output TaskParameter="ShortSha" PropertyName="_GFV_ShortSha" />
+      <Output TaskParameter="BuildMetaData" PropertyName="_GFV_BuildMetaData" />
+      <Output TaskParameter="FullBuildMetaData" PropertyName="_GFV_FullBuildMetaData" />
+      <Output TaskParameter="InformationalVersion" PropertyName="_GFV_InformationalVersion" />
+      <Output TaskParameter="AssemblySemVer" PropertyName="_GFV_AssemblySemVer" />
+      <Output TaskParameter="AssemblySemFileVer" PropertyName="_GFV_AssemblySemFileVer" />
+      <Output TaskParameter="GitVersionInformationFile" PropertyName="_GFV_GitVersionInformationFile" />
+      <Output TaskParameter="AssemblyInfoFile" PropertyName="_GFV_AssemblyInfoFile" />
+    </ComputeGitFlowVersionTask>
+
+    <!-- Set standard MSBuild version properties -->
+    <PropertyGroup>
+      <Version>$(_GFV_SemVer)</Version>
+      <AssemblyVersion>$(_GFV_AssemblySemVer)</AssemblyVersion>
+      <FileVersion>$(_GFV_AssemblySemFileVer)</FileVersion>
+      <InformationalVersion>$(_GFV_InformationalVersion)</InformationalVersion>
+      <PackageVersion>$(_GFV_SemVer)</PackageVersion>
+    </PropertyGroup>
+
+    <!-- Add generated files to compilation -->
+    <ItemGroup>
+      <Compile Include="$(_GFV_GitVersionInformationFile)" Condition="'$(_GFV_GitVersionInformationFile)' != ''" />
+      <Compile Include="$(_GFV_AssemblyInfoFile)" Condition="'$(_GFV_AssemblyInfoFile)' != ''" />
+    </ItemGroup>
+  </Target>
+</Project>
