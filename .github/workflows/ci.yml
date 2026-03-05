@@ -25,16 +25,16 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.x
+          dotnet-version: 9.x
 
       - name: Restore
-        run: dotnet restore Timtek.GitFlowVersioning.sln
+        run: dotnet restore Timtek.GitFlowVersioning.slnx
 
       - name: Build
-        run: dotnet build Timtek.GitFlowVersioning.sln --no-restore --configuration ${{ env.CONFIGURATION }}
+        run: dotnet build Timtek.GitFlowVersioning.slnx --no-restore --configuration ${{ env.CONFIGURATION }}
 
       - name: Test
-        run: dotnet test Timtek.GitFlowVersioning.sln --no-build --configuration ${{ env.CONFIGURATION }} --logger trx --results-directory TestResults
+        run: dotnet test Timtek.GitFlowVersioning.slnx --no-build --configuration ${{ env.CONFIGURATION }} --logger trx --results-directory TestResults
 
       - name: Upload test results
         if: always()
