@@ -4,12 +4,16 @@
     Pinned version for bootstrapping. Once a working NuGet package is
     published, this solution can install its own package from the
     previous build to provide automatic versioning.
+
+    Version and PackageVersion use Condition="'$(...)' == ''" so that an
+    explicit command-line /p:Version=<tag> used by CI during dotnet pack
+    is always honoured and not overridden here.
   -->
   <PropertyGroup>
-    <Version>0.0.3</Version>
-    <PackageVersion>0.0.3</PackageVersion>
+    <Version Condition="'$(Version)' == ''">0.0.5</Version>
+    <PackageVersion Condition="'$(PackageVersion)' == ''">$(Version)</PackageVersion>
     <AssemblyVersion>0.0.0.0</AssemblyVersion>
-    <FileVersion>0.0.3.0</FileVersion>
-    <InformationalVersion>0.0.3</InformationalVersion>
+    <FileVersion>0.0.5.0</FileVersion>
+    <InformationalVersion>0.0.5</InformationalVersion>
   </PropertyGroup>
 </Project>

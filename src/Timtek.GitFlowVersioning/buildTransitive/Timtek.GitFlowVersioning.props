@@ -6,4 +6,13 @@
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
   </PropertyGroup>
+
+  <!-- Capture the Version value here, at props-evaluation time, before the project file's own
+       property groups or the SDK's DefaultAssemblyInfo targets have had a chance to run.
+       At this point, $(Version) will only be non-empty if the user has explicitly set it via
+       the command line (/p:Version=X) or in Directory.Build.props. This lets the versioning
+       target detect and respect an explicitly provided version. -->
+  <PropertyGroup>
+    <_GFV_UserSetVersion>$(Version)</_GFV_UserSetVersion>
+  </PropertyGroup>
 </Project>
