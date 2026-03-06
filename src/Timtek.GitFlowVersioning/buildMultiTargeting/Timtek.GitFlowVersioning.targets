@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Imported only in the outer build of multi-TFM projects, where GenerateNuspec/Pack runs.
+     Sets PackageVersion so the .nupkg gets the correct computed version. -->
+<Project>
+  <PropertyGroup>
+    <GitFlowVersioningEnabled Condition="'$(GitFlowVersioningEnabled)' == ''">true</GitFlowVersioningEnabled>
+    <_GitFlowVersioningTaskAssembly Condition="Exists('$(MSBuildThisFileDirectory)..\tasks\netstandard2.0\Timtek.GitFlowVersioning.dll')">$(MSBuildThisFileDirectory)..\tasks\netstandard2.0\Timtek.GitFlowVersioning.dll</_GitFlowVersioningTaskAssembly>
+    <_GitFlowVersioningTaskAssembly Condition="'$(_GitFlowVersioningTaskAssembly)' == '' And Exists('$(MSBuildThisFileDirectory)..\src\Timtek.GitFlowVersioning\bin\Debug\netstandard2.0\Timtek.GitFlowVersioning.dll')">$(MSBuildThisFileDirectory)..\src\Timtek.GitFlowVersioning\bin\Debug\netstandard2.0\Timtek.GitFlowVersioning.dll</_GitFlowVersioningTaskAssembly>
+  </PropertyGroup>
+
+  <UsingTask TaskName="Timtek.GitFlowVersioning.Tasks.ComputeGitFlowVersionTask"
+             AssemblyFile="$(_GitFlowVersioningTaskAssembly)"
+             Condition="'$(_GitFlowVersioningTaskAssembly)' != ''" />
+
+  <Target Name="_ComputeGitFlowVersionForPack"
+          BeforeTargets="GenerateNuspec"
+          Condition="'$(GitFlowVersioningEnabled)' == 'true' And '$(DesignTimeBuild)' != 'true' And '$(_GitFlowVersioningTaskAssembly)' != ''">
+
+    <ComputeGitFlowVersionTask
+        ProjectDirectory="$(MSBuildProjectDirectory)"
+        IntermediateOutputPath="$(BaseIntermediateOutputPath)">
+      <Output TaskParameter="SemVer" PropertyName="_GFV_SemVer" />
+      <Output TaskParameter="InformationalVersion" PropertyName="_GFV_InformationalVersion" />
+      <Output TaskParameter="AssemblySemVer" PropertyName="_GFV_AssemblySemVer" />
+      <Output TaskParameter="AssemblySemFileVer" PropertyName="_GFV_AssemblySemFileVer" />
+    </ComputeGitFlowVersionTask>
+
+    <PropertyGroup>
+      <Version>$(_GFV_SemVer)</Version>
+      <PackageVersion>$(_GFV_SemVer)</PackageVersion>
+      <AssemblyVersion>$(_GFV_AssemblySemVer)</AssemblyVersion>
+      <FileVersion>$(_GFV_AssemblySemFileVer)</FileVersion>
+      <InformationalVersion>$(_GFV_InformationalVersion)</InformationalVersion>
+    </PropertyGroup>
+  </Target>
+</Project>

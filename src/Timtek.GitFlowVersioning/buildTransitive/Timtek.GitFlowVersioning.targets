@@ -8,15 +8,11 @@
     <_GitFlowVersioningTaskAssembly Condition="'$(_GitFlowVersioningTaskAssembly)' == '' And Exists('$(MSBuildThisFileDirectory)..\src\Timtek.GitFlowVersioning\bin\Debug\netstandard2.0\Timtek.GitFlowVersioning.dll')">$(MSBuildThisFileDirectory)..\src\Timtek.GitFlowVersioning\bin\Debug\netstandard2.0\Timtek.GitFlowVersioning.dll</_GitFlowVersioningTaskAssembly>
   </PropertyGroup>
 
-  <!-- Ensure version computation runs before NuGet pack targets read PackageVersion -->
-  <PropertyGroup Condition="'$(GitFlowVersioningEnabled)' != 'false'">
-    <GetPackageVersionDependsOn>_ComputeGitFlowVersion;$(GetPackageVersionDependsOn)</GetPackageVersionDependsOn>
-  </PropertyGroup>
-
   <UsingTask TaskName="Timtek.GitFlowVersioning.Tasks.ComputeGitFlowVersionTask"
              AssemblyFile="$(_GitFlowVersioningTaskAssembly)"
              Condition="'$(_GitFlowVersioningTaskAssembly)' != ''" />
 
+  <!-- Runs during inner per-TFM builds for compile-time versioning -->
   <Target Name="_ComputeGitFlowVersion"
           BeforeTargets="CoreCompile;GenerateAssemblyInfo;BeforeBuild"
           Condition="'$(GitFlowVersioningEnabled)' == 'true' And '$(DesignTimeBuild)' != 'true' And '$(_GitFlowVersioningTaskAssembly)' != ''">

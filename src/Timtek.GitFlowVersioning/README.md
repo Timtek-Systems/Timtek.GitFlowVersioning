@@ -6,6 +6,14 @@ A minimal, opinionated GitFlow-focussed versioning utility for .NET MSBuild proj
 
 `Timtek.GitFlowVersioning` automatically computes semantic version numbers from your Git history during the build, so you never need to maintain version numbers by hand. It reads your branch name and the most recent version tag to produce a fully populated set of version properties including `Version`, `PackageVersion`, `AssemblyVersion`, `FileVersion`, and `InformationalVersion`.
 
+This solution is deliberately constrained in scope. It is designed to work for:
+
+- Standard *GitFlow* workflows using `main`, `develop`, `release/*`, and `hotfix/*` branches.
+- .NET SDK-style projects using MSBuild version properties and the `dotnet` CLI.
+- TeamCity and GitHub Actions CI environments.
+
+This supports our approach to versioning and release management across our projects without the overhead and complexity of more widely-scoped tools. If your workflow or requirements differ, there are other excellent Git-based versioning tools available that may be a better fit.
+
 ## How It Works
 
 The package ships as a development dependency containing an MSBuild task. At build time the task:

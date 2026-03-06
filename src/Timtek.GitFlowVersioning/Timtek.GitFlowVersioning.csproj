@@ -25,6 +25,7 @@
     <None Include="README.md" Pack="true" PackagePath="\" />
     <None Include="build\**" Pack="true" PackagePath="build\" />
     <None Include="buildTransitive\**" Pack="true" PackagePath="buildTransitive\" />
+    <None Include="buildMultiTargeting\**" Pack="true" PackagePath="buildMultiTargeting\" />
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="tasks\netstandard2.0\" Condition="Exists('$(OutputPath)\$(AssemblyName).dll')" />
   </ItemGroup>
 </Project>
