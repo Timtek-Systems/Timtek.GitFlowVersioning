@@ -5,6 +5,7 @@
     <RootNamespace>Timtek.GitFlowVersioning</RootNamespace>
     <IsPackable>true</IsPackable>
     <PackageId>Timtek.GitFlowVersioning</PackageId>
+    <Version>0.0.4</Version>
     <Description>A minimal, opinionated GitFlow-focussed versioning utility for .NET MSBuild</Description>
     <DevelopmentDependency>true</DevelopmentDependency>
     <IncludeBuildOutput>false</IncludeBuildOutput>

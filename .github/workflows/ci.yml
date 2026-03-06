@@ -43,8 +43,23 @@ jobs:
           name: test-results
           path: TestResults/*.trx
 
+      - name: Determine package version
+        id: pkg-version
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "version=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            # Fall back to the version in the csproj
+            echo "version=" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Pack
-        run: dotnet pack src/Timtek.GitFlowVersioning/Timtek.GitFlowVersioning.csproj --no-build --configuration ${{ env.CONFIGURATION }} --output nupkgs
+        run: |
+          VERSION_ARG=""
+          if [[ -n "${{ steps.pkg-version.outputs.version }}" ]]; then
+            VERSION_ARG="/p:Version=${{ steps.pkg-version.outputs.version }}"
+          fi
+          dotnet pack src/Timtek.GitFlowVersioning/Timtek.GitFlowVersioning.csproj --no-build --configuration ${{ env.CONFIGURATION }} --output nupkgs $VERSION_ARG
 
       - name: Upload NuGet packages
         uses: actions/upload-artifact@v4
