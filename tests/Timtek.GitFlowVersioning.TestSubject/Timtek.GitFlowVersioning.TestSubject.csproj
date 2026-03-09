@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Import versioning props (disables SDK assembly info generation) -->
+  <Import Project="..\..\src\Timtek.GitFlowVersioning\build\Timtek.GitFlowVersioning.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <PackageId>Timtek.GitFlowVersioning.TestSubject</PackageId>
+    <Description>Test subject for verifying that GitFlow versioning correctly sets the NuGet package version</Description>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Point directly at the locally-built task assembly so the versioning
+         targets resolve without requiring a NuGet package install.
+         The Exists guard prevents build failures in environments (e.g. NCrunch)
+         where the task DLL is not available at the expected relative path. -->
+    <_GitFlowVersioningTaskAssembly Condition="Exists('$(MSBuildThisFileDirectory)..\..\src\Timtek.GitFlowVersioning\bin\$(Configuration)\netstandard2.0\Timtek.GitFlowVersioning.dll')">$(MSBuildThisFileDirectory)..\..\src\Timtek.GitFlowVersioning\bin\$(Configuration)\netstandard2.0\Timtek.GitFlowVersioning.dll</_GitFlowVersioningTaskAssembly>
+  </PropertyGroup>
+
+  <!-- Ensure the task assembly is built before this project.
+       ReferenceOutputAssembly=false prevents adding a runtime dependency. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Timtek.GitFlowVersioning\Timtek.GitFlowVersioning.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+
+  <!-- Import versioning targets (defines the _ComputeGitFlowVersion target) -->
+  <Import Project="..\..\src\Timtek.GitFlowVersioning\build\Timtek.GitFlowVersioning.targets" />
+</Project>

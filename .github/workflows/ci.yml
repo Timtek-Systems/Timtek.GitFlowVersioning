@@ -67,6 +67,37 @@ jobs:
           name: nupkgs
           path: nupkgs/*.nupkg
 
+      # Pack the test subject to verify the versioning task stamps the correct version.
+      # This is NOT pushed to any feed; it only validates end-to-end NuGet versioning.
+      - name: Pack test subject
+        run: dotnet pack tests/Timtek.GitFlowVersioning.TestSubject/Timtek.GitFlowVersioning.TestSubject.csproj --configuration ${{ env.CONFIGURATION }} --output test-nupkgs
+
+      - name: Verify test subject version
+        run: |
+          echo "::group::Test subject packages"
+          ls -la test-nupkgs/
+          echo "::endgroup::"
+          EXPECTED="${{ steps.pkg-version.outputs.version }}"
+          if [[ -n "$EXPECTED" ]]; then
+            if ls test-nupkgs/*"${EXPECTED}"*.nupkg 1>/dev/null 2>&1; then
+              echo "✅ Test subject package version matches expected: ${EXPECTED}"
+            else
+              echo "❌ Expected test subject package version ${EXPECTED} but got:"
+              ls test-nupkgs/
+              exit 1
+            fi
+          else
+            echo "ℹ️ No explicit version expected (branch build). Test subject packages:"
+            ls test-nupkgs/
+          fi
+
+      - name: Upload test subject packages
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-subject-nupkgs
+          path: test-nupkgs/*.nupkg
+
       # All successful builds push to MyGet
       - name: Push to MyGet
         if: github.event_name == 'push'

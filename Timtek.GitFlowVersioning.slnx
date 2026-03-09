@@ -4,5 +4,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Timtek.GitFlowVersioning.Specs/Timtek.GitFlowVersioning.Specs.csproj" />
+    <Project Path="tests/Timtek.GitFlowVersioning.TestSubject/Timtek.GitFlowVersioning.TestSubject.csproj" />
   </Folder>
 </Solution>
