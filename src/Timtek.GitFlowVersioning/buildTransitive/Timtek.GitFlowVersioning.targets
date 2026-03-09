@@ -46,13 +46,16 @@
       <Output TaskParameter="AssemblyInfoFile" PropertyName="_GFV_AssemblyInfoFile" />
     </ComputeGitFlowVersionTask>
 
-    <!-- Set standard MSBuild version properties -->
+    <!-- Set standard MSBuild version properties. Version and PackageVersion are only set if
+         the user has not already provided an explicit value via the command line (/p:Version=X)
+         or Directory.Build.props. This prevents the task from overriding an explicitly
+         specified version, such as when CI passes /p:Version=$(tag) to dotnet pack. -->
     <PropertyGroup>
-      <Version>$(_GFV_SemVer)</Version>
+      <Version Condition="'$(_GFV_UserSetVersion)' == ''">$(_GFV_SemVer)</Version>
       <AssemblyVersion>$(_GFV_AssemblySemVer)</AssemblyVersion>
       <FileVersion>$(_GFV_AssemblySemFileVer)</FileVersion>
       <InformationalVersion>$(_GFV_InformationalVersion)</InformationalVersion>
-      <PackageVersion>$(_GFV_SemVer)</PackageVersion>
+      <PackageVersion Condition="'$(_GFV_UserSetVersion)' == ''">$(_GFV_SemVer)</PackageVersion>
     </PropertyGroup>
 
     <!-- Add generated files to compilation -->

@@ -26,8 +26,12 @@
     </ComputeGitFlowVersionTask>
 
     <PropertyGroup>
-      <Version>$(_GFV_SemVer)</Version>
-      <PackageVersion>$(_GFV_SemVer)</PackageVersion>
+      <!-- Set Version and PackageVersion only if the user has not already provided an explicit
+           value via the command line (/p:Version=X) or Directory.Build.props. This prevents
+           the task from overriding an explicitly specified version, such as when CI passes
+           /p:Version=$(tag) to dotnet pack. -->
+      <Version Condition="'$(_GFV_UserSetVersion)' == ''">$(_GFV_SemVer)</Version>
+      <PackageVersion Condition="'$(_GFV_UserSetVersion)' == ''">$(_GFV_SemVer)</PackageVersion>
       <AssemblyVersion>$(_GFV_AssemblySemVer)</AssemblyVersion>
       <FileVersion>$(_GFV_AssemblySemFileVer)</FileVersion>
       <InformationalVersion>$(_GFV_InformationalVersion)</InformationalVersion>
