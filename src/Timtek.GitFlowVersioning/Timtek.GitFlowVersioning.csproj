@@ -15,6 +15,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,6 +25,7 @@
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\art\Timtek-Spot-GitVersion-logo.png" Pack="true" PackagePath="icon.png" />
     <None Include="build\**" Pack="true" PackagePath="build\" />
     <None Include="buildTransitive\**" Pack="true" PackagePath="buildTransitive\" />
     <None Include="buildMultiTargeting\**" Pack="true" PackagePath="buildMultiTargeting\" />

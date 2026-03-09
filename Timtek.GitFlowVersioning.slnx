@@ -1,4 +1,17 @@
 <Solution>
+  <Folder Name="/art/">
+    <File Path="art/Timtek-Spot-GitVersion-logo.pdn" />
+    <File Path="art/Timtek-Spot-GitVersion-logo.png" />
+    <File Path="art/Timtek.GitFlowVersioning.png" />
+  </Folder>
+  <Folder Name="/docs/">
+    <File Path="docs/ci-integration.md" />
+    <File Path="docs/faq.md" />
+    <File Path="docs/getting-started.md" />
+    <File Path="docs/how-it-works.md" />
+    <File Path="docs/index.md" />
+    <File Path="docs/version-variables.md" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/Timtek.GitFlowVersioning/Timtek.GitFlowVersioning.csproj" />
   </Folder>

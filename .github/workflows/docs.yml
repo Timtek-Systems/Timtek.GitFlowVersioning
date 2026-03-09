@@ -1,0 +1,63 @@
+name: Publish Docs
+
+# Only run for tagged releases on main
+on:
+  push:
+    tags: ["[0-9]+.[0-9]+.[0-9]+*"]
+
+permissions:
+  contents: write   # mike pushes to gh-pages branch
+  pages: write
+  id-token: write
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  publish-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # mike needs full history for the gh-pages branch
+
+      - name: Verify tag is on main
+        id: check-main
+        run: |
+          git fetch origin main
+          if git merge-base --is-ancestor ${{ github.sha }} origin/main; then
+            echo "on_main=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "on_main=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Tag ${{ github.ref_name }} is not on main. Skipping docs publish."
+          fi
+
+      - name: Setup Python
+        if: steps.check-main.outputs.on_main == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install MkDocs and dependencies
+        if: steps.check-main.outputs.on_main == 'true'
+        run: pip install mkdocs-material mike
+
+      - name: Configure Git for mike
+        if: steps.check-main.outputs.on_main == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Deploy versioned docs
+        if: steps.check-main.outputs.on_main == 'true'
+        run: |
+          VERSION="${{ github.ref_name }}"
+          echo "Publishing docs for version ${VERSION}"
+
+          # Deploy this version and update the 'latest' alias to point to it
+          mike deploy --push --update-aliases "${VERSION}" latest
+
+          # Set the default version shown when visiting the root URL
+          mike set-default --push latest
