@@ -4,7 +4,7 @@
     <AssemblyName>Timtek.GitFlowVersioning</AssemblyName>
     <RootNamespace>Timtek.GitFlowVersioning</RootNamespace>
     <IsPackable>true</IsPackable>
-    <PackageId>Timtek.GitFlowVersioning</PackageId>
+    <PackageId>Timtek.GitFlowVersion</PackageId>
     <!-- This package cannot use its own versioning tool (circular dependency).
          Update this version manually before each release. -->
     <Version>1.0.0-beta.1</Version>
@@ -36,3 +36,4 @@
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="tasks\netstandard2.0\" Condition="Exists('$(OutputPath)\$(AssemblyName).dll')" />
   </ItemGroup>
 </Project>
+
