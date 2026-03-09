@@ -15,6 +15,8 @@
     <Version>1.0.0-beta.1</Version>
     <Description>CLI tool that computes GitFlow-based semantic versions from git history and outputs them as JSON</Description>
     <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
     <None Include="..\..\art\Timtek-Spot-GitVersion-logo.png" Pack="true" PackagePath="icon.png" />
   </ItemGroup>
 </Project>
