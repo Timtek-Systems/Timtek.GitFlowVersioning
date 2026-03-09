@@ -227,3 +227,6 @@ ServiceFabricBackup/
 
 # Project-specific
 /.NCrunch_Timtek.GitFlowVersioning
+
+# Docs build output
+site/
