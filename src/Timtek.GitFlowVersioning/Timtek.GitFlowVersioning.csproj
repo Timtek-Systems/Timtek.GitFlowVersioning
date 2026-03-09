@@ -46,4 +46,12 @@
 
   <!-- Self-versioning: import the versioning target that runs the task before compilation -->
   <Import Project="build\Timtek.GitFlowVersioning.targets" />
+
+  <!-- Write the computed version to a plain text file so CI can read it reliably -->
+  <Target Name="_WriteComputedVersion" AfterTargets="_ComputeGitFlowVersion"
+          Condition="'$(_GFV_SemVer)' != ''">
+    <WriteLinesToFile File="$(IntermediateOutputPath)computed-version.txt"
+                      Lines="$(_GFV_SemVer)"
+                      Overwrite="true" />
+  </Target>
 </Project>

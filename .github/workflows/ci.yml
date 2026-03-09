@@ -40,7 +40,22 @@ jobs:
           # Second build: the task DLL now exists, so the self-versioning target runs
           # and stamps every project with the version computed from Git — using the
           # exact same C# logic that consumers of the package will use.
-          dotnet build Timtek.GitFlowVersioning.slnx --configuration ${{ env.CONFIGURATION }}
+          # --no-incremental forces a full rebuild (the bootstrap left the project
+          # up-to-date, which would cause MSBuild to skip it otherwise).
+          dotnet build Timtek.GitFlowVersioning.slnx --no-incremental --configuration ${{ env.CONFIGURATION }}
+
+      - name: Extract computed version
+        id: version
+        run: |
+          VERSION_FILE="src/Timtek.GitFlowVersioning/obj/${{ env.CONFIGURATION }}/netstandard2.0/computed-version.txt"
+          if [[ -f "$VERSION_FILE" ]]; then
+            VERSION=$(cat "$VERSION_FILE" | tr -d '[:space:]')
+            echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+            echo "::notice title=GitFlowVersion::Computed version: ${VERSION}"
+          else
+            echo "::error::computed-version.txt not found at ${VERSION_FILE}. The versioning task did not run."
+            exit 1
+          fi
 
       - name: Test
         run: dotnet test Timtek.GitFlowVersioning.slnx --no-build --configuration ${{ env.CONFIGURATION }} --logger trx --results-directory TestResults
@@ -51,20 +66,6 @@ jobs:
         with:
           name: test-results
           path: TestResults/*.trx
-
-      - name: Extract computed version
-        id: version
-        run: |
-          # Read the SemVer that the task actually computed (single source of truth).
-          GVI_FILE=$(find src/Timtek.GitFlowVersioning/obj -name 'GitVersionInformation.g.cs' -print -quit 2>/dev/null)
-          if [[ -n "$GVI_FILE" ]]; then
-            VERSION=$(grep 'SemVer =' "$GVI_FILE" | head -1 | sed 's/.*"\(.*\)".*/\1/')
-            echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-            echo "::notice title=GitFlowVersion::Computed version: ${VERSION}"
-          else
-            echo "::warning::GitVersionInformation.g.cs not found; falling back to 0.0.0-unversioned"
-            echo "version=0.0.0-unversioned" >> "$GITHUB_OUTPUT"
-          fi
 
       - name: Pack
         run: dotnet pack src/Timtek.GitFlowVersioning/Timtek.GitFlowVersioning.csproj --no-build --configuration ${{ env.CONFIGURATION }} --output nupkgs /p:Version=${{ steps.version.outputs.version }}
