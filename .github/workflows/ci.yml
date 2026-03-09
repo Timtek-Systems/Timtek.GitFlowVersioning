@@ -30,32 +30,20 @@ jobs:
       - name: Restore
         run: dotnet restore Timtek.GitFlowVersioning.slnx
 
-      - name: Bootstrap build
-        run: |
-          # First build produces the task DLL (versioning skipped — DLL does not exist yet).
-          dotnet build src/Timtek.GitFlowVersioning/Timtek.GitFlowVersioning.csproj --no-restore --configuration ${{ env.CONFIGURATION }}
-
       - name: Build
-        run: |
-          # Second build: the task DLL now exists, so the self-versioning target runs
-          # and stamps every project with the version computed from Git — using the
-          # exact same C# logic that consumers of the package will use.
-          # --no-incremental forces a full rebuild (the bootstrap left the project
-          # up-to-date, which would cause MSBuild to skip it otherwise).
-          dotnet build Timtek.GitFlowVersioning.slnx --no-incremental --configuration ${{ env.CONFIGURATION }}
+        run: dotnet build Timtek.GitFlowVersioning.slnx --no-restore --configuration ${{ env.CONFIGURATION }}
 
-      - name: Extract computed version
+      - name: Compute version
         id: version
         run: |
-          VERSION_FILE="src/Timtek.GitFlowVersioning/obj/${{ env.CONFIGURATION }}/netstandard2.0/computed-version.txt"
-          if [[ -f "$VERSION_FILE" ]]; then
-            VERSION=$(cat "$VERSION_FILE" | tr -d '[:space:]')
-            echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-            echo "::notice title=GitFlowVersion::Computed version: ${VERSION}"
-          else
-            echo "::error::computed-version.txt not found at ${VERSION_FILE}. The versioning task did not run."
-            exit 1
-          fi
+          VERSION_JSON=$(dotnet run --project src/Timtek.GitFlowVersion.Tool/Timtek.GitFlowVersion.Tool.csproj --configuration ${{ env.CONFIGURATION }})
+          SEMVER=$(echo "$VERSION_JSON" | jq -r '.SemVer')
+          FULL_SEMVER=$(echo "$VERSION_JSON" | jq -r '.FullSemVer')
+          INFORMATIONAL_VERSION=$(echo "$VERSION_JSON" | jq -r '.InformationalVersion')
+          echo "semver=$SEMVER" >> "$GITHUB_OUTPUT"
+          echo "fullSemVer=$FULL_SEMVER" >> "$GITHUB_OUTPUT"
+          echo "informationalVersion=$INFORMATIONAL_VERSION" >> "$GITHUB_OUTPUT"
+          echo "::notice title=GitFlowVersion::SemVer=$SEMVER FullSemVer=$FULL_SEMVER"
 
       - name: Test
         run: dotnet test Timtek.GitFlowVersioning.slnx --no-build --configuration ${{ env.CONFIGURATION }} --logger trx --results-directory TestResults
@@ -67,8 +55,19 @@ jobs:
           name: test-results
           path: TestResults/*.trx
 
-      - name: Pack
-        run: dotnet pack src/Timtek.GitFlowVersioning/Timtek.GitFlowVersioning.csproj --no-build --configuration ${{ env.CONFIGURATION }} --output nupkgs /p:Version=${{ steps.version.outputs.version }}
+      - name: Pack versioning package
+        run: >
+          dotnet pack src/Timtek.GitFlowVersioning/Timtek.GitFlowVersioning.csproj
+          --no-build --configuration ${{ env.CONFIGURATION }} --output nupkgs
+          -p:PackageVersion=${{ steps.version.outputs.semver }}
+          -p:Version=${{ steps.version.outputs.semver }}
+
+      - name: Pack tool
+        run: >
+          dotnet pack src/Timtek.GitFlowVersion.Tool/Timtek.GitFlowVersion.Tool.csproj
+          --configuration ${{ env.CONFIGURATION }} --output nupkgs
+          -p:PackageVersion=${{ steps.version.outputs.semver }}
+          -p:Version=${{ steps.version.outputs.semver }}
 
       - name: Upload NuGet packages
         uses: actions/upload-artifact@v4
@@ -86,12 +85,12 @@ jobs:
           echo "::group::Test subject packages"
           ls -la test-nupkgs/
           echo "::endgroup::"
-          EXPECTED="${{ steps.version.outputs.version }}"
-          if ls test-nupkgs/*"${EXPECTED}"*.nupkg 1>/dev/null 2>&1; then
-            echo "✅ Test subject package version matches expected: ${EXPECTED}"
+          # The test subject is versioned by the task (not manually), so just
+          # confirm a package was produced.
+          if ls test-nupkgs/*.nupkg 1>/dev/null 2>&1; then
+            echo "✅ Test subject package produced successfully"
           else
-            echo "❌ Expected test subject package version ${EXPECTED} but got:"
-            ls test-nupkgs/
+            echo "❌ No test subject package was produced"
             exit 1
           fi
 

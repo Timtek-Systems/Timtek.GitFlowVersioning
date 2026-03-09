@@ -81,8 +81,18 @@ For CI systems that are not explicitly supported, the task still sets all MSBuil
 version properties. The version is visible in the build output log and can be
 captured from the `Version` or `PackageVersion` MSBuild properties.
 
-If you need to extract the version in a script, you can read it from the built
-assembly or NuGet package, or add a custom MSBuild target that writes it to a file:
+Alternatively, use the [CLI tool](cli-tool.md) to compute the version independently
+of MSBuild and pass it to downstream steps:
+
+```bash
+SEMVER=$(dotnet gitflowversion | jq -r '.SemVer')
+dotnet pack -p:PackageVersion=$SEMVER
+```
+
+See the [CLI Tool](cli-tool.md) page for full installation and usage details.
+
+If you need to extract the version purely from MSBuild, you can add a custom target
+that writes it to a file:
 
 ```xml
 <Target Name="WriteVersion" AfterTargets="_ComputeGitFlowVersion">

@@ -1,14 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Self-versioning: disable SDK assembly info generation so the task provides its own -->
-  <Import Project="build\Timtek.GitFlowVersioning.props" />
-
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Timtek.GitFlowVersioning</AssemblyName>
     <RootNamespace>Timtek.GitFlowVersioning</RootNamespace>
     <IsPackable>true</IsPackable>
     <PackageId>Timtek.GitFlowVersioning</PackageId>
-    <Version>0.0.0-unversioned</Version>
+    <!-- This package cannot use its own versioning tool (circular dependency).
+         Update this version manually before each release. -->
+    <Version>1.0.0-beta.1</Version>
     <Description>A minimal, opinionated GitFlow-focussed versioning utility for .NET MSBuild</Description>
     <DevelopmentDependency>true</DevelopmentDependency>
     <IncludeBuildOutput>false</IncludeBuildOutput>
@@ -19,15 +18,6 @@
     <LangVersion>latest</LangVersion>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <!-- Self-versioning: point at our own build output so the versioning task can run.
-         On a clean build the DLL does not yet exist; the Exists guard causes versioning
-         to be skipped and the fallback Version above is used instead. After one successful
-         build the DLL exists and all subsequent builds are versioned from Git. -->
-    <_GitFlowVersioningTaskAssembly
-        Condition="Exists('$(OutputPath)$(AssemblyName).dll')">$(OutputPath)$(AssemblyName).dll</_GitFlowVersioningTaskAssembly>
   </PropertyGroup>
 
   <ItemGroup>
@@ -43,15 +33,4 @@
     <None Include="buildMultiTargeting\**" Pack="true" PackagePath="buildMultiTargeting\" />
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="tasks\netstandard2.0\" Condition="Exists('$(OutputPath)\$(AssemblyName).dll')" />
   </ItemGroup>
-
-  <!-- Self-versioning: import the versioning target that runs the task before compilation -->
-  <Import Project="build\Timtek.GitFlowVersioning.targets" />
-
-  <!-- Write the computed version to a plain text file so CI can read it reliably -->
-  <Target Name="_WriteComputedVersion" AfterTargets="_ComputeGitFlowVersion"
-          Condition="'$(_GFV_SemVer)' != ''">
-    <WriteLinesToFile File="$(IntermediateOutputPath)computed-version.txt"
-                      Lines="$(_GFV_SemVer)"
-                      Overwrite="true" />
-  </Target>
 </Project>

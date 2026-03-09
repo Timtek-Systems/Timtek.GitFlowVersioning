@@ -13,6 +13,7 @@
     <File Path="docs/version-variables.md" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/Timtek.GitFlowVersion.Tool/Timtek.GitFlowVersion.Tool.csproj" />
     <Project Path="src/Timtek.GitFlowVersioning/Timtek.GitFlowVersioning.csproj" />
   </Folder>
   <Folder Name="/tests/">
