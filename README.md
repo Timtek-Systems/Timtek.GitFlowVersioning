@@ -154,9 +154,7 @@ The task is designed to never fail a build. If it cannot compute a version for a
 
 ## Documentation
 
-For complete installation instructions, usage examples, CI integration patterns, and detailed reference documentation, visit:
-
-**https://timtek-systems.github.io/Timtek.GitFlowVersioning/**
+For complete installation instructions, usage examples, CI integration patterns, and detailed reference documentation, see the files in `docs/`.
 
 ## License
 

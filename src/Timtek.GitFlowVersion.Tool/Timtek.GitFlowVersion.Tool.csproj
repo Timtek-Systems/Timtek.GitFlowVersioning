@@ -15,7 +15,7 @@
     <Version>1.0.0-beta.1</Version>
     <Description>CLI tool that computes GitFlow-based semantic versions from git history and outputs them as JSON</Description>
     <PackageIcon>icon.png</PackageIcon>
-    <PackageReadmeFile>..\..\README.md</PackageReadmeFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 

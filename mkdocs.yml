@@ -1,5 +1,4 @@
 site_name: Timtek.GitFlowVersioning
-site_url: https://timtek-systems.github.io/Timtek.GitFlowVersioning/
 site_description: A minimal, opinionated GitFlow-focussed versioning utility for .NET MSBuild
 repo_url: https://github.com/Timtek-Systems/Timtek.GitFlowVersioning
 repo_name: Timtek-Systems/Timtek.GitFlowVersioning
@@ -32,11 +31,6 @@ theme:
     - toc.integrate
   icon:
     repo: fontawesome/brands/github
-
-extra:
-  version:
-    provider: mike
-    alias: true
 
 nav:
   - Home: index.md
