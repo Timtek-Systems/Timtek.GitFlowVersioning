@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>Timtek.GitFlowVersion.Tool</AssemblyName>
+    <RootNamespace>Timtek.GitFlowVersion.Tool</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- dotnet tool packaging -->
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>gitflowversion</ToolCommandName>
+    <PackageId>Timtek.GitFlowVersion.Tool</PackageId>
+    <Version>1.0.0-beta.1</Version>
+    <Description>CLI tool that computes GitFlow-based semantic versions from git history and outputs them as JSON</Description>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Timtek.GitFlowVersioning\Timtek.GitFlowVersioning.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
+    <None Include="..\..\art\Timtek-Spot-GitVersion-logo.png" Pack="true" PackagePath="icon.png" />
+  </ItemGroup>
+</Project>

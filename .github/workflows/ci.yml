@@ -33,6 +33,18 @@ jobs:
       - name: Build
         run: dotnet build Timtek.GitFlowVersioning.slnx --no-restore --configuration ${{ env.CONFIGURATION }}
 
+      - name: Compute version
+        id: version
+        run: |
+          VERSION_JSON=$(dotnet run --project src/Timtek.GitFlowVersion.Tool/Timtek.GitFlowVersion.Tool.csproj --configuration ${{ env.CONFIGURATION }})
+          SEMVER=$(echo "$VERSION_JSON" | jq -r '.SemVer')
+          FULL_SEMVER=$(echo "$VERSION_JSON" | jq -r '.FullSemVer')
+          INFORMATIONAL_VERSION=$(echo "$VERSION_JSON" | jq -r '.InformationalVersion')
+          echo "semver=$SEMVER" >> "$GITHUB_OUTPUT"
+          echo "fullSemVer=$FULL_SEMVER" >> "$GITHUB_OUTPUT"
+          echo "informationalVersion=$INFORMATIONAL_VERSION" >> "$GITHUB_OUTPUT"
+          echo "::notice title=GitFlowVersion::SemVer=$SEMVER FullSemVer=$FULL_SEMVER"
+
       - name: Test
         run: dotnet test Timtek.GitFlowVersioning.slnx --no-build --configuration ${{ env.CONFIGURATION }} --logger trx --results-directory TestResults
 
@@ -43,23 +55,19 @@ jobs:
           name: test-results
           path: TestResults/*.trx
 
-      - name: Determine package version
-        id: pkg-version
-        run: |
-          if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            echo "version=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
-          else
-            # Fall back to the version in the csproj
-            echo "version=" >> "$GITHUB_OUTPUT"
-          fi
+      - name: Pack versioning package
+        run: >
+          dotnet pack src/Timtek.GitFlowVersioning/Timtek.GitFlowVersioning.csproj
+          --no-build --configuration ${{ env.CONFIGURATION }} --output nupkgs
+          -p:PackageVersion=${{ steps.version.outputs.semver }}
+          -p:Version=${{ steps.version.outputs.semver }}
 
-      - name: Pack
-        run: |
-          VERSION_ARG=""
-          if [[ -n "${{ steps.pkg-version.outputs.version }}" ]]; then
-            VERSION_ARG="/p:Version=${{ steps.pkg-version.outputs.version }}"
-          fi
-          dotnet pack src/Timtek.GitFlowVersioning/Timtek.GitFlowVersioning.csproj --no-build --configuration ${{ env.CONFIGURATION }} --output nupkgs $VERSION_ARG
+      - name: Pack tool
+        run: >
+          dotnet pack src/Timtek.GitFlowVersion.Tool/Timtek.GitFlowVersion.Tool.csproj
+          --configuration ${{ env.CONFIGURATION }} --output nupkgs
+          -p:PackageVersion=${{ steps.version.outputs.semver }}
+          -p:Version=${{ steps.version.outputs.semver }}
 
       - name: Upload NuGet packages
         uses: actions/upload-artifact@v4
@@ -77,18 +85,13 @@ jobs:
           echo "::group::Test subject packages"
           ls -la test-nupkgs/
           echo "::endgroup::"
-          EXPECTED="${{ steps.pkg-version.outputs.version }}"
-          if [[ -n "$EXPECTED" ]]; then
-            if ls test-nupkgs/*"${EXPECTED}"*.nupkg 1>/dev/null 2>&1; then
-              echo "✅ Test subject package version matches expected: ${EXPECTED}"
-            else
-              echo "❌ Expected test subject package version ${EXPECTED} but got:"
-              ls test-nupkgs/
-              exit 1
-            fi
+          # The test subject is versioned by the task (not manually), so just
+          # confirm a package was produced.
+          if ls test-nupkgs/*.nupkg 1>/dev/null 2>&1; then
+            echo "✅ Test subject package produced successfully"
           else
-            echo "ℹ️ No explicit version expected (branch build). Test subject packages:"
-            ls test-nupkgs/
+            echo "❌ No test subject package was produced"
+            exit 1
           fi
 
       - name: Upload test subject packages

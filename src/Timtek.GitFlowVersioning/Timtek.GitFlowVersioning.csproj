@@ -4,8 +4,10 @@
     <AssemblyName>Timtek.GitFlowVersioning</AssemblyName>
     <RootNamespace>Timtek.GitFlowVersioning</RootNamespace>
     <IsPackable>true</IsPackable>
-    <PackageId>Timtek.GitFlowVersioning</PackageId>
-    <Version>0.0.0-unversioned</Version>
+    <PackageId>Timtek.GitFlowVersion</PackageId>
+    <!-- This package cannot use its own versioning tool (circular dependency).
+         Update this version manually before each release. -->
+    <Version>1.0.0-beta.1</Version>
     <Description>A minimal, opinionated GitFlow-focussed versioning utility for .NET MSBuild</Description>
     <DevelopmentDependency>true</DevelopmentDependency>
     <IncludeBuildOutput>false</IncludeBuildOutput>
@@ -15,6 +17,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,9 +28,12 @@
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
+    <None Include="..\..\art\Timtek-Spot-GitVersion-logo.png" Pack="true" PackagePath="icon.png" />
     <None Include="build\**" Pack="true" PackagePath="build\" />
     <None Include="buildTransitive\**" Pack="true" PackagePath="buildTransitive\" />
     <None Include="buildMultiTargeting\**" Pack="true" PackagePath="buildMultiTargeting\" />
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="tasks\netstandard2.0\" Condition="Exists('$(OutputPath)\$(AssemblyName).dll')" />
   </ItemGroup>
 </Project>
+
