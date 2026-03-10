@@ -15,7 +15,8 @@ public static class GitInfoGatherer
         if (branchName == "HEAD")
             branchName = TryGetBranchNameFromDetachedHead(repoRoot, sha);
 
-        var (baseTag, distance, hasTag) = GetVersionFromDescribe(repoRoot);
+        var (baseTag, distanceFromTag, hasTag) = GetVersionFromDescribe(repoRoot);
+        var distance = GetBranchAwareDistance(repoRoot, branchName, distanceFromTag);
 
         return new Versioning.GitCommitInfo
         {
@@ -25,6 +26,35 @@ public static class GitInfoGatherer
             CommitDistance = distance,
             HasTag = hasTag
         };
+    }
+
+    private static int GetBranchAwareDistance(string repoRoot, string branchName, int distanceFromTag)
+    {
+        if (branchName.StartsWith("release/", StringComparison.OrdinalIgnoreCase))
+            return TryGetDistanceFromMergeBase(repoRoot, "develop") ?? distanceFromTag;
+
+        if (branchName.StartsWith("hotfix/", StringComparison.OrdinalIgnoreCase))
+        {
+            var hotfixDistance = TryGetDistanceFromMergeBase(repoRoot, "main")
+                                 ?? TryGetDistanceFromMergeBase(repoRoot, "master");
+            return hotfixDistance ?? distanceFromTag;
+        }
+
+        return distanceFromTag;
+    }
+
+    private static int? TryGetDistanceFromMergeBase(string repoRoot, string sourceBranch)
+    {
+        try
+        {
+            var mergeBase = GitCommandRunner.RunCommand($"merge-base HEAD {sourceBranch}", repoRoot);
+            var distanceText = GitCommandRunner.RunCommand($"rev-list --count {mergeBase}..HEAD", repoRoot);
+            return int.TryParse(distanceText, out var distance) ? distance : null;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static string FindRepoRoot(string directory)

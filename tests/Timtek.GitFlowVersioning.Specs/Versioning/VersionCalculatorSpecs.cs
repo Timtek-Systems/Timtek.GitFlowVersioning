@@ -60,9 +60,19 @@ class when_computing_version_for_release_branch : With_git_commit_info_builder
 {
     Establish context = () => CommitInfo = BuildCommitInfo("release/1.3.0", "1.2.3", distance: 3);
     Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
+    It should_use_branch_version_as_base = () => Result.MajorMinorPatch.ShouldEqual("1.3.0");
     It should_have_beta_prerelease_label = () => Result.PreReleaseLabel.ShouldEqual("beta");
     It should_have_prerelease_number_equal_to_distance = () => Result.PreReleaseNumber.ShouldEqual("3");
-    It should_have_correct_semver = () => Result.SemVer.ShouldEqual("1.2.3-beta.3");
+    It should_have_correct_semver = () => Result.SemVer.ShouldEqual("1.3.0-beta.3");
+}
+
+[Subject(typeof(VersionCalculator), "release branch with non-version suffix")]
+class when_computing_version_for_release_branch_without_semver_suffix : With_git_commit_info_builder
+{
+    Establish context = () => CommitInfo = BuildCommitInfo("release/candidate", "1.2.3", distance: 2);
+    Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
+    It should_fallback_to_tag_base_version = () => Result.MajorMinorPatch.ShouldEqual("1.2.3");
+    It should_have_correct_semver = () => Result.SemVer.ShouldEqual("1.2.3-beta.2");
 }
 
 [Subject(typeof(VersionCalculator), "hotfix branch")]
@@ -118,4 +128,13 @@ class when_computing_version_with_fallback_base_version : With_git_commit_info_b
     It should_use_fallback_base_version = () => Result.MajorMinorPatch.ShouldEqual("0.1.0");
     It should_have_alpha_label = () => Result.PreReleaseLabel.ShouldEqual("alpha");
     It should_have_correct_semver = () => Result.SemVer.ShouldEqual("0.1.0-alpha.5");
+}
+
+[Subject(typeof(VersionCalculator), "detached tagged commit")]
+class when_computing_version_for_exact_tagged_commit_in_detached_context : With_git_commit_info_builder
+{
+    Establish context = () => CommitInfo = BuildCommitInfo("tags/1.0.1", "1.0.1", distance: 0);
+    Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
+    It should_not_have_prerelease_label = () => Result.PreReleaseLabel.ShouldBeEmpty();
+    It should_have_stable_semver = () => Result.SemVer.ShouldEqual("1.0.1");
 }

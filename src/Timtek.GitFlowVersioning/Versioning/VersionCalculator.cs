@@ -10,9 +10,13 @@ public static class VersionCalculator
     /// <returns>A fully populated <see cref="VersionInfo"/>.</returns>
     public static VersionInfo Calculate(GitCommitInfo commitInfo)
     {
-        var baseVersion = ParseBaseVersion(commitInfo.BaseVersionTag);
+        var parsedBaseVersion = ParseBaseVersion(commitInfo.BaseVersionTag);
         var branchType = BranchClassifier.Classify(commitInfo.BranchName);
+        var baseVersion = ResolveBaseVersion(parsedBaseVersion, branchType, commitInfo.BranchName);
         var distance = commitInfo.CommitDistance;
+
+        if (IsExactTaggedCommit(commitInfo))
+            return BuildMainVersion(baseVersion, distance, commitInfo);
 
         return branchType switch
         {
@@ -119,6 +123,25 @@ public static class VersionCalculator
 
     private static string EscapeBranchName(string branchName) =>
         branchName.Replace("/", "-");
+
+    private static Version ResolveBaseVersion(Version tagBaseVersion, BranchType branchType, string branchName)
+    {
+        if (branchType is not (BranchType.Release or BranchType.Hotfix))
+            return tagBaseVersion;
+
+        var slashIndex = branchName.IndexOf('/');
+        if (slashIndex < 0 || slashIndex == branchName.Length - 1)
+            return tagBaseVersion;
+
+        var versionText = branchName.Substring(slashIndex + 1);
+        if (!Version.TryParse(versionText, out var parsedBranchVersion))
+            return tagBaseVersion;
+
+        return new Version(parsedBranchVersion.Major, parsedBranchVersion.Minor, parsedBranchVersion.Build < 0 ? 0 : parsedBranchVersion.Build);
+    }
+
+    private static bool IsExactTaggedCommit(GitCommitInfo commitInfo) =>
+        commitInfo.HasTag && commitInfo.CommitDistance == 0;
 
     private static Version ParseBaseVersion(string tag)
     {
