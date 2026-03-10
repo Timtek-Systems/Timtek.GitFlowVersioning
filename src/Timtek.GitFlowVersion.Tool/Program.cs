@@ -1,8 +1,8 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Timtek.GitFlowVersioning.Git;
-using Timtek.GitFlowVersioning.Versioning;
+using Timtek.GitFlowVersion.Git;
+using Timtek.GitFlowVersion.Versioning;
 
 var directory = args.Length > 0 ? args[0] : Directory.GetCurrentDirectory();
 

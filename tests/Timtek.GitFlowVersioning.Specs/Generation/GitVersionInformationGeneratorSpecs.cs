@@ -1,8 +1,8 @@
 using Machine.Specifications;
-using Timtek.GitFlowVersioning.Generation;
-using Timtek.GitFlowVersioning.Versioning;
+using Timtek.GitFlowVersion.Generation;
+using Timtek.GitFlowVersion.Versioning;
 
-namespace Timtek.GitFlowVersioning.Specs.Generation;
+namespace Timtek.GitFlowVersion.Specs.Generation;
 
 [Subject(typeof(GitVersionInformationGenerator))]
 class when_generating_git_version_information_for_a_stable_release

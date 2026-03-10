@@ -1,4 +1,4 @@
-# Timtek.GitFlowVersioning
+# Timtek.GitFlowVersion
 
 A minimal, opinionated GitFlow-focussed versioning utility for .NET projects that automatically computes semantic version numbers from your Git history.
 
@@ -6,14 +6,14 @@ A minimal, opinionated GitFlow-focussed versioning utility for .NET projects tha
 
 This project provides two complementary tools:
 
-1. **Timtek.GitFlowVersioning** — An MSBuild task for automatic versioning in .NET projects
+1. **Timtek.GitFlowVersion** — An MSBuild task for automatic versioning in .NET projects
 2. **Timtek.GitFlowVersion.Tool** — A standalone CLI tool for computing versions from Git history
 
 Both tools automatically compute semantic version numbers from your Git history during the build or on-demand, so you never need to maintain version numbers by hand.
 
 ## What It Does
 
-`Timtek.GitFlowVersioning` reads your branch name and the most recent version tag to produce a fully populated set of version properties including `Version`, `PackageVersion`, `AssemblyVersion`, `FileVersion`, and `InformationalVersion`.
+`Timtek.GitFlowVersion` reads your branch name and the most recent version tag to produce a fully populated set of version properties including `Version`, `PackageVersion`, `AssemblyVersion`, `FileVersion`, and `InformationalVersion`.
 
 This solution is deliberately constrained in scope. It is designed to work for:
 
@@ -54,7 +54,7 @@ The base version is taken from the most recent Git tag matching `*.*.*` (with or
 Install the package into your project:
 
 ```shell
-dotnet add package Timtek.GitFlowVersioning
+dotnet add package Timtek.GitFlowVersion
 ```
 
 That's it. The next `dotnet build` or `dotnet pack` will automatically compute and apply versions. No configuration is required for standard GitFlow workflows.

@@ -2,7 +2,7 @@
 
 ## Overview
 
-`Timtek.GitFlowVersioning` ships as a NuGet package containing an MSBuild task.
+`Timtek.GitFlowVersion` ships as a NuGet package containing an MSBuild task.
 The task runs automatically before compilation and performs four steps:
 
 1. **Inspect** — reads the current branch name and runs `git describe` to find the nearest version tag.

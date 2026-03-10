@@ -4,13 +4,13 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <RootNamespace>Timtek.GitFlowVersioning.Specs</RootNamespace>
+    <RootNamespace>Timtek.GitFlowVersion.Specs</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Timtek.GitFlowVersioning\Timtek.GitFlowVersioning.csproj" />
+    <ProjectReference Include="..\..\src\Timtek.GitFlowVersioning\Timtek.GitFlowVersion.csproj" />
   </ItemGroup>
 
   <ItemGroup>

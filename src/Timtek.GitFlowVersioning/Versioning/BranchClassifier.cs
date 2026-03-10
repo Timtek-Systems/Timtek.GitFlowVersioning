@@ -1,4 +1,4 @@
-namespace Timtek.GitFlowVersioning.Versioning;
+namespace Timtek.GitFlowVersion.Versioning;
 
 /// <summary>Classifies a git branch name into a <see cref="BranchType"/> according to GitFlow conventions.</summary>
 public static class BranchClassifier

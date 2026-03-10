@@ -1,7 +1,7 @@
 using Machine.Specifications;
-using Timtek.GitFlowVersioning.Versioning;
+using Timtek.GitFlowVersion.Versioning;
 
-namespace Timtek.GitFlowVersioning.Specs.Versioning;
+namespace Timtek.GitFlowVersion.Specs.Versioning;
 
 [Subject(typeof(BranchClassifier))]
 class when_classifying_main_branch

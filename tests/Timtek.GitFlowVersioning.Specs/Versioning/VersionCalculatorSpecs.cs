@@ -1,7 +1,7 @@
 using Machine.Specifications;
-using Timtek.GitFlowVersioning.Versioning;
+using Timtek.GitFlowVersion.Versioning;
 
-namespace Timtek.GitFlowVersioning.Specs.Versioning;
+namespace Timtek.GitFlowVersion.Specs.Versioning;
 
 class With_git_commit_info_builder
 {

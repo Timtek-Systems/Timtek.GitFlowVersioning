@@ -4,11 +4,11 @@
 <Project>
   <PropertyGroup>
     <GitFlowVersioningEnabled Condition="'$(GitFlowVersioningEnabled)' == ''">true</GitFlowVersioningEnabled>
-    <_GitFlowVersioningTaskAssembly Condition="Exists('$(MSBuildThisFileDirectory)..\tasks\netstandard2.0\Timtek.GitFlowVersioning.dll')">$(MSBuildThisFileDirectory)..\tasks\netstandard2.0\Timtek.GitFlowVersioning.dll</_GitFlowVersioningTaskAssembly>
-    <_GitFlowVersioningTaskAssembly Condition="'$(_GitFlowVersioningTaskAssembly)' == '' And Exists('$(MSBuildThisFileDirectory)..\src\Timtek.GitFlowVersioning\bin\Debug\netstandard2.0\Timtek.GitFlowVersioning.dll')">$(MSBuildThisFileDirectory)..\src\Timtek.GitFlowVersioning\bin\Debug\netstandard2.0\Timtek.GitFlowVersioning.dll</_GitFlowVersioningTaskAssembly>
+    <_GitFlowVersioningTaskAssembly Condition="Exists('$(MSBuildThisFileDirectory)..\tasks\netstandard2.0\Timtek.GitFlowVersion.dll')">$(MSBuildThisFileDirectory)..\tasks\netstandard2.0\Timtek.GitFlowVersion.dll</_GitFlowVersioningTaskAssembly>
+    <_GitFlowVersioningTaskAssembly Condition="'$(_GitFlowVersioningTaskAssembly)' == '' And Exists('$(MSBuildThisFileDirectory)..\src\Timtek.GitFlowVersioning\bin\Debug\netstandard2.0\Timtek.GitFlowVersion.dll')">$(MSBuildThisFileDirectory)..\src\Timtek.GitFlowVersioning\bin\Debug\netstandard2.0\Timtek.GitFlowVersion.dll</_GitFlowVersioningTaskAssembly>
   </PropertyGroup>
 
-  <UsingTask TaskName="Timtek.GitFlowVersioning.Tasks.ComputeGitFlowVersionTask"
+  <UsingTask TaskName="Timtek.GitFlowVersion.Tasks.ComputeGitFlowVersionTask"
              AssemblyFile="$(_GitFlowVersioningTaskAssembly)"
              Condition="'$(_GitFlowVersioningTaskAssembly)' != '' And Exists('$(_GitFlowVersioningTaskAssembly)')" />
 

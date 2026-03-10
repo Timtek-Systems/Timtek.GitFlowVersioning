@@ -1,4 +1,4 @@
-namespace Timtek.GitFlowVersioning.Versioning;
+namespace Timtek.GitFlowVersion.Versioning;
 
 /// <summary>Computes <see cref="VersionInfo"/> from raw <see cref="GitCommitInfo"/>.</summary>
 public static class VersionCalculator

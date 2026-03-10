@@ -1,4 +1,4 @@
-namespace Timtek.GitFlowVersioning.Git;
+namespace Timtek.GitFlowVersion.Git;
 
 /// <summary>Gathers git commit information from a repository directory.</summary>
 public static class GitInfoGatherer

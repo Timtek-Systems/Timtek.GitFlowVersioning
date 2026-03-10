@@ -1,13 +1,10 @@
-using System;
-using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Timtek.GitFlowVersioning.CI;
-using Timtek.GitFlowVersioning.Generation;
-using Timtek.GitFlowVersioning.Git;
-using Timtek.GitFlowVersioning.Versioning;
+using Timtek.GitFlowVersion.CI;
+using Timtek.GitFlowVersion.Generation;
+using Timtek.GitFlowVersion.Git;
+using Timtek.GitFlowVersion.Versioning;
 
-namespace Timtek.GitFlowVersioning.Tasks;
+namespace Timtek.GitFlowVersion.Tasks;
 
 /// <summary>MSBuild task that computes GitFlow-based semantic versions from git history.</summary>
 public class ComputeGitFlowVersionTask : Microsoft.Build.Utilities.Task
@@ -60,7 +57,7 @@ public class ComputeGitFlowVersionTask : Microsoft.Build.Utilities.Task
         }
         catch (Exception ex)
         {
-            Log.LogWarning($"Timtek.GitFlowVersioning: Failed to compute version: {ex.Message}. Falling back to '{UnversionedVersion}'.");
+            Log.LogWarning($"Timtek.GitFlowVersion: Failed to compute version: {ex.Message}. Falling back to '{UnversionedVersion}'.");
             SetFallbackVersion();
         }
 
@@ -101,7 +98,7 @@ public class ComputeGitFlowVersionTask : Microsoft.Build.Utilities.Task
         File.WriteAllText(gitVersionFile, GitVersionInformationGenerator.Generate(versionInfo));
         GitVersionInformationFile = gitVersionFile;
 
-        var assemblyInfoFile = Path.Combine(IntermediateOutputPath, "Timtek.GitFlowVersioning.AssemblyInfo.g.cs");
+        var assemblyInfoFile = Path.Combine(IntermediateOutputPath, "Timtek.GitFlowVersion.AssemblyInfo.g.cs");
         File.WriteAllText(assemblyInfoFile, GitVersionInformationGenerator.GenerateAssemblyInfo(versionInfo));
         AssemblyInfoFile = assemblyInfoFile;
     }
@@ -109,7 +106,7 @@ public class ComputeGitFlowVersionTask : Microsoft.Build.Utilities.Task
     private void LogVersionSummary(VersionInfo v)
     {
         Log.LogMessage(MessageImportance.High, "");
-        Log.LogMessage(MessageImportance.High, "Timtek.GitFlowVersioning:");
+        Log.LogMessage(MessageImportance.High, "Timtek.GitFlowVersion:");
         Log.LogMessage(MessageImportance.High, $"  FullSemVer:           {v.FullSemVer}");
         Log.LogMessage(MessageImportance.High, $"  SemVer:               {v.SemVer}");
         Log.LogMessage(MessageImportance.High, $"  AssemblySemVer:       {v.AssemblySemVer}");
