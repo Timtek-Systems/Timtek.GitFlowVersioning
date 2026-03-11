@@ -6,6 +6,8 @@ These instructions are automatically included in Copilot chat conversations.
 Learn more: <https://code.visualstudio.com/docs/copilot/customization/custom-instructions>
 -->
 
+# General Guidelines
+- Do not make code changes unless explicitly requested by the user; when discussing possible fixes, provide recommendations without applying edits automatically.
 
 # Coding Standards
 
@@ -121,7 +123,7 @@ To avoid unintentional releases, the `dotnet publish` command should not be run 
 
 ## Use the correct command for GitFlowVersion
 
-The dotnet global tool command name must be invoked as `dotnet gitflowversion` (not via a shim like `gitflowversion`). The ToolCommandName in the .csproj should be set to `dotnet-gitflowversion`, which allows the `dotnet gitflowversion` invocation pattern.
+The dotnet global tool command name must be invoked as `dotnet gitflowversion` (not via a shim like `gitflowversion`). The ToolCommandName in the .csproj should be set to `dotnet-gitflowversion`, which allows the `dotnet gitflowversion` invocation pattern. Avoid shim-based invocation where possible because anti-malware sandboxing can block shim executables. When asked to re-register Timtek.GitFlowVersion.Tool, prefer global registration only (not local manifest), because the tool runs against other repositories and local registration provides no utility.
 
 # MVVM Conventions
 
@@ -215,3 +217,7 @@ The `.Property()` approach:
 # Versioning Conventions
 
 - Git release tags use bare semantic versions (e.g., "1.0.0") without a "v" prefix.
+
+# Fixture Generation
+
+- For this repository, the snapshot command must continue generating C# fixture code; only the topology extraction method should change (use git fast-export parsing instead of git log heuristics).
