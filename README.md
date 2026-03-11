@@ -64,6 +64,7 @@ That's it. The next `dotnet build` or `dotnet pack` will automatically compute a
 Install as a local tool (recommended for team projects):
 
 ```shell
+dotnet new tool-manifest
 dotnet tool install Timtek.GitFlowVersion.Tool
 ```
 
@@ -72,6 +73,8 @@ Or install globally:
 ```shell
 dotnet tool install --global Timtek.GitFlowVersion.Tool
 ```
+
+In both cases, invoke the tool as `dotnet gitflowversion`.
 
 ## Usage
 
@@ -88,7 +91,7 @@ git tag 1.0.0
 git push origin 1.0.0
 ```
 
-Tags can optionally use a `v` prefix (`v1.0.0`).
+Tags can optionally use a `v` prefix (`v1.0.0`);
 
 ### CLI Tool
 
@@ -111,6 +114,16 @@ The tool outputs a JSON object containing all computed version variables:
   ...
 }
 ```
+
+To capture a deterministic replay fixture from a real repository:
+
+```shell
+dotnet gitflowversion snapshot /path/to/other/repo ./fixtures/release-1.2.3.json
+```
+
+The generated snapshot stores the captured `CommitInfo` and `ExpectedVersion`
+so the scenario can be replayed in tests without depending on the original Git
+history.
 
 ## Accessing Version Information at Runtime
 

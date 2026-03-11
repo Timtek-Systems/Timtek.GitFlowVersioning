@@ -15,15 +15,14 @@ public static class VersionCalculator
         var baseVersion = ResolveBaseVersion(parsedBaseVersion, branchType, commitInfo.BranchName);
         var distance = commitInfo.CommitDistance;
 
-        if (IsExactTaggedCommit(commitInfo))
-            return BuildMainVersion(baseVersion, distance, commitInfo);
-
         return branchType switch
         {
             BranchType.Main    => BuildMainVersion(baseVersion, distance, commitInfo),
             BranchType.Release => BuildPrereleaseVersion(baseVersion, distance, "beta", commitInfo),
             BranchType.Hotfix  => BuildPrereleaseVersion(baseVersion, distance, "beta", commitInfo),
             BranchType.Develop => BuildDevelopVersion(baseVersion, distance, commitInfo),
+            _ when IsExactTaggedCommit(commitInfo)
+                               => BuildMainVersion(baseVersion, distance, commitInfo),
             _                  => BuildPrereleaseVersion(baseVersion, distance, "alpha", commitInfo),
         };
     }

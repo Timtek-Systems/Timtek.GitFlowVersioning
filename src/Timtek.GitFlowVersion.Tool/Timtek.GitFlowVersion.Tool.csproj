@@ -10,7 +10,7 @@
     <!-- dotnet tool packaging -->
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
-    <ToolCommandName>gitflowversion</ToolCommandName>
+    <ToolCommandName>dotnet-gitflowversion</ToolCommandName>
     <PackageId>Timtek.GitFlowVersion.Tool</PackageId>
     <Version>1.0.0-beta.1</Version>
     <Description>CLI tool that computes GitFlow-based semantic versions from git history and outputs them as JSON</Description>

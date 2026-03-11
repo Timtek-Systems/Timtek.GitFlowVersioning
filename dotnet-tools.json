@@ -5,7 +5,7 @@
     "timtek.gitflowversion.tool": {
       "version": "1.0.0-beta.1",
       "commands": [
-        "gitflowversion"
+        "dotnet-gitflowversion"
       ],
       "rollForward": false
     }

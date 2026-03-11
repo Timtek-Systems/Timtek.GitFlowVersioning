@@ -50,7 +50,7 @@ It is important that code is kept simple and easy to read and understand. The fo
 - Aim for minimum 90% coverage, but recognise that full coverage is not always achievable or desirable.
 - Spec class names should fully describe the test context. The "when_*" class name should fully describe the test context and not rely on the file name for context. For example, a spec named `when_mid_is_valid` should be renamed to a more descriptive name like `when_updating_a_gen2_device_in_production_mode_without_clearing_counters_and_MID_is_valid` to provide full context in the test runner display.
 - Passing tests are contracts. When adding new code, if a previously-passing spec breaks, this may indicate a regression or unintended side effect. Such breakages should be flagged for review and discussion before changing any code or tests.
-- MSpec delegates (Establish, Because, It, Cleanup) must be synchronous. All delegates must execute synchronously because MSpec does not support async delegates.
+- MSpec delegates (Establish, Because, It, Cleanup) must be synchronous. All delegates must execute synchronously because MSpec does not support async delegates. **Establish should be a single expression that builds the context. Because is where the unit under test gets exercised. Additional setup logic (like copying directories) belongs in Because, not Establish. Each It assertion should also be a single expression.**
 - Use a Context-Builder pattern, where each test class has a Context object containing the test data, results, services, etc. and a Builder object used to build the context for the test. The Establish clause should be a single statement where possible, similar to: `Establish context = () => Context = Builder.WithSomeScenario().Build();`. For efficiency, tests that share a common context should inherit from a base class named `With_{context_name}` that provides common setup and utilities and that's where the Context-Builder pattern should be established.
 
 # Internal Conventions
@@ -118,6 +118,10 @@ var command = new AsyncRelayCommand(
 ## Do not run publish unless specifically requested
 
 To avoid unintentional releases, the `dotnet publish` command should not be run as part of regular development or build processes unless there is a specific need to create a published output (e.g., for deployment or distribution). Instead, focus on building and testing the codebase.
+
+## Use the correct command for GitFlowVersion
+
+The dotnet global tool command name must be invoked as `dotnet gitflowversion` (not via a shim like `gitflowversion`). The ToolCommandName in the .csproj should be set to `dotnet-gitflowversion`, which allows the `dotnet gitflowversion` invocation pattern.
 
 # MVVM Conventions
 

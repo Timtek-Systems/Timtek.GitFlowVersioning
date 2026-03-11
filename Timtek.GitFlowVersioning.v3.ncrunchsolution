@@ -5,4 +5,12 @@
     <RdiConfigured>True</RdiConfigured>
     <SolutionConfigured>True</SolutionConfigured>
   </Settings>
+  <EngineModes>
+    <EngineMode>
+      <Name>Run impacted unit tests; Integration tests manually</Name>
+      <Settings>
+        <TestsToExecuteAutomatically>FullNameDoesNotMatchRegex 'Integration'</TestsToExecuteAutomatically>
+      </Settings>
+    </EngineMode>
+  </EngineModes>
 </SolutionConfiguration>

@@ -17,6 +17,7 @@
     <Project Path="src/Timtek.GitFlowVersioning/Timtek.GitFlowVersion.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Timtek.GitFlowVersion.IntegrationSpecs/Timtek.GitFlowVersion.IntegrationSpecs.csproj" />
     <Project Path="tests/Timtek.GitFlowVersioning.Specs/Timtek.GitFlowVersioning.Specs.csproj" />
     <Project Path="tests/Timtek.GitFlowVersioning.TestSubject/Timtek.GitFlowVersioning.TestSubject.csproj" />
   </Folder>
