@@ -25,9 +25,9 @@ public static class GitHistoryAnalyzer
     private sealed class CommitRecord
     {
         public string Mark { get; set; } = "";
-        public string Branch { get; set; } = "";
         public string? ParentMark { get; set; }
         public List<string> MergeMarks { get; } = new List<string>();
+        public string? PreferredBranch { get; set; }
     }
 
     private sealed class TagRecord
@@ -40,14 +40,9 @@ public static class GitHistoryAnalyzer
     {
         public List<CommitRecord> Commits { get; } = new List<CommitRecord>();
         public List<TagRecord> Tags { get; } = new List<TagRecord>();
+        public Dictionary<string, string> BranchTips { get; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
     }
 
-    /// <summary>
-    /// Parses a <c>git fast-export --all --no-data</c> output stream into
-    /// commit and tag records. Commits appear in the topological order that
-    /// fast-export emits them. Branch information is taken directly from the
-    /// <c>commit refs/heads/&lt;branch&gt;</c> lines, which is authoritative.
-    /// </summary>
     private static ParseResult ParseFastExport(string output)
     {
         var result = new ParseResult();
@@ -73,6 +68,12 @@ public static class GitHistoryAnalyzer
             if (line.StartsWith("reset refs/tags/", StringComparison.Ordinal))
             {
                 ParseLightweightTag(lines, ref position, line, result);
+                continue;
+            }
+
+            if (line.StartsWith("reset ", StringComparison.Ordinal))
+            {
+                ParseBranchReset(lines, ref position, line, result);
                 continue;
             }
 
@@ -102,17 +103,7 @@ public static class GitHistoryAnalyzer
     private static void ParseCommitRecord(string[] lines, ref int position, string headerLine, ParseResult result)
     {
         var refPath = headerLine.Substring("commit ".Length).Trim();
-        var branch = ExtractBranchName(refPath);
-
-        // Skip commits on refs we don't recognise (notes, stash, etc.)
-        if (branch == null)
-        {
-            position++;
-            SkipRecordBody(lines, ref position);
-            return;
-        }
-
-        var commit = new CommitRecord { Branch = branch };
+        var commit = new CommitRecord { PreferredBranch = ExtractBranchName(refPath) };
         position++;
 
         while (position < lines.Length)
@@ -125,7 +116,6 @@ public static class GitHistoryAnalyzer
                 break;
             }
 
-            // A new top-level record means this record ended without a blank line
             if (IsRecordStart(line))
                 break;
 
@@ -150,7 +140,17 @@ public static class GitHistoryAnalyzer
             position++;
         }
 
-        result.Commits.Add(commit);
+        if (!string.IsNullOrEmpty(commit.Mark))
+        {
+            result.Commits.Add(commit);
+
+            if (!string.IsNullOrWhiteSpace(commit.PreferredBranch))
+            {
+                var preferredBranch = commit.PreferredBranch;
+                if (preferredBranch != null)
+                    result.BranchTips[preferredBranch] = commit.Mark;
+            }
+        }
     }
 
     private static void ParseAnnotatedTag(string[] lines, ref int position, string headerLine, ParseResult result)
@@ -209,9 +209,7 @@ public static class GitHistoryAnalyzer
                 break;
 
             if (line.StartsWith("from :", StringComparison.Ordinal))
-            {
                 commitMark = line.Substring("from :".Length);
-            }
 
             position++;
         }
@@ -220,57 +218,83 @@ public static class GitHistoryAnalyzer
             result.Tags.Add(new TagRecord { Name = tagName, CommitMark = commitMark });
     }
 
+    private static void ParseBranchReset(string[] lines, ref int position, string headerLine, ParseResult result)
+    {
+        var refPath = headerLine.Substring("reset ".Length).Trim();
+        var branchName = ExtractBranchName(refPath);
+        string? commitMark = null;
+        position++;
+
+        while (position < lines.Length)
+        {
+            var line = lines[position].TrimEnd('\r');
+
+            if (string.IsNullOrEmpty(line))
+            {
+                position++;
+                break;
+            }
+
+            if (IsRecordStart(line))
+                break;
+
+            if (line.StartsWith("from :", StringComparison.Ordinal))
+                commitMark = line.Substring("from :".Length);
+
+            position++;
+        }
+
+        if (!string.IsNullOrWhiteSpace(branchName) && !string.IsNullOrWhiteSpace(commitMark))
+        {
+            var normalizedBranchName = branchName;
+            var normalizedCommitMark = commitMark;
+            if (normalizedBranchName != null && normalizedCommitMark != null)
+                result.BranchTips[normalizedBranchName] = normalizedCommitMark;
+        }
+    }
+
     private static bool IsRecordStart(string line) =>
         line.StartsWith("commit ", StringComparison.Ordinal) ||
         line.StartsWith("tag ", StringComparison.Ordinal) ||
         line.StartsWith("reset ", StringComparison.Ordinal) ||
         line == "blob";
 
-    private static void SkipRecordBody(string[] lines, ref int position)
-    {
-        while (position < lines.Length)
-        {
-            var line = lines[position].TrimEnd('\r');
-
-            if (IsRecordStart(line))
-                return;
-
-            if (line.StartsWith("data ", StringComparison.Ordinal))
-            {
-                SkipDataBlock(lines, ref position);
-                continue;
-            }
-
-            position++;
-        }
-    }
-
-    /// <summary>
-    /// Skips past a <c>data &lt;N&gt;</c> block. The current position must be
-    /// on the <c>data</c> line. After this method returns, <paramref name="position"/>
-    /// points to the first line after the data content.
-    /// </summary>
     private static void SkipDataBlock(string[] lines, ref int position)
     {
         var dataLine = lines[position].TrimEnd('\r');
-        if (!int.TryParse(dataLine.Substring("data ".Length), out var byteCount))
+        int remainingBytes;
+        try
+        {
+            remainingBytes = int.Parse(dataLine.Substring("data ".Length));
+        }
+        catch
         {
             position++;
             return;
         }
 
-        position++; // move past the "data N" line
+        position++;
 
-        if (byteCount == 0)
-            return;
-
-        // Consume lines until we have accounted for byteCount bytes.
-        // Each consumed line contributes its length + 1 (for the LF separator).
-        var consumed = 0;
-        while (position < lines.Length && consumed < byteCount)
+        while (position < lines.Length && remainingBytes > 0)
         {
-            consumed += lines[position].TrimEnd('\r').Length + 1; // +1 for the LF
-            position++;
+            var line = lines[position].TrimEnd('\r');
+            var lineWithNewlineBytes = line.Length + 1;
+
+            if (remainingBytes >= lineWithNewlineBytes)
+            {
+                remainingBytes -= lineWithNewlineBytes;
+                position++;
+                continue;
+            }
+
+            if (remainingBytes < line.Length)
+            {
+                lines[position] = line.Substring(remainingBytes);
+                return;
+            }
+
+            lines[position] = string.Empty;
+            return;
         }
     }
 
@@ -287,22 +311,112 @@ public static class GitHistoryAnalyzer
         };
     }
 
-    /// <summary>
-    /// Converts parsed fast-export records into an ordered list of
-    /// <see cref="BuilderStep"/> operations.
-    /// </summary>
+    private static Dictionary<string, HashSet<string>> BuildFirstParentChains(
+        Dictionary<string, string> branchTips,
+        Dictionary<string, CommitRecord> commitByMark)
+    {
+        var chains = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var kvp in branchTips)
+        {
+            var chain = new HashSet<string>();
+            var currentMark = kvp.Value;
+
+            while (!string.IsNullOrWhiteSpace(currentMark) && chain.Add(currentMark))
+            {
+                if (!commitByMark.TryGetValue(currentMark, out var commit) || commit.ParentMark == null)
+                    break;
+
+                currentMark = commit.ParentMark;
+            }
+
+            chains[kvp.Key] = chain;
+        }
+
+        return chains;
+    }
+
+    private static Dictionary<string, string> AssignCommitsToBranches(
+        List<CommitRecord> commits,
+        Dictionary<string, HashSet<string>> firstParentChains)
+    {
+        var branchesByPriority = firstParentChains.Keys
+            .OrderBy(GetBranchPriority)
+            .ThenBy(name => name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (branchesByPriority.Count == 0)
+        {
+            branchesByPriority = commits
+                .Where(c => !string.IsNullOrWhiteSpace(c.PreferredBranch))
+                .Select(c => c.PreferredBranch!)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(GetBranchPriority)
+                .ThenBy(name => name, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
+        var assignment = new Dictionary<string, string>();
+
+        foreach (var commit in commits)
+        {
+            string? bestBranch = null;
+            var bestPriority = int.MaxValue;
+
+            foreach (var branch in branchesByPriority)
+            {
+                if (!firstParentChains.TryGetValue(branch, out var chain) || !chain.Contains(commit.Mark))
+                    continue;
+
+                var priority = GetBranchPriority(branch);
+                if (priority >= bestPriority)
+                    continue;
+
+                bestPriority = priority;
+                bestBranch = branch;
+            }
+
+            if (bestBranch == null && !string.IsNullOrWhiteSpace(commit.PreferredBranch))
+                bestBranch = commit.PreferredBranch;
+
+            assignment[commit.Mark] = bestBranch ?? branchesByPriority.FirstOrDefault() ?? "main";
+        }
+
+        return assignment;
+    }
+
+    private static string DetermineRootBranch(
+        List<CommitRecord> commits,
+        Dictionary<string, string> commitBranch,
+        IEnumerable<string> knownBranches)
+    {
+        var rootCandidates = commits
+            .Where(c => c.ParentMark == null)
+            .Select(c => commitBranch[c.Mark])
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(GetBranchPriority)
+            .ThenBy(name => name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (rootCandidates.Count > 0)
+            return rootCandidates[0];
+
+        return knownBranches
+            .OrderBy(GetBranchPriority)
+            .ThenBy(name => name, StringComparer.OrdinalIgnoreCase)
+            .FirstOrDefault() ?? "main";
+    }
+
     private static List<BuilderStep> ProduceSteps(ParseResult parseResult, string currentBranch)
     {
         var commits = parseResult.Commits;
         if (commits.Count == 0)
             return new List<BuilderStep>();
 
-        // Build mark → commit lookup
-        var commitByMark = new Dictionary<string, CommitRecord>();
-        foreach (var commit in commits)
-            commitByMark[commit.Mark] = commit;
+        var commitByMark = commits.ToDictionary(c => c.Mark);
+        var firstParentChains = BuildFirstParentChains(parseResult.BranchTips, commitByMark);
+        var commitBranch = AssignCommitsToBranches(commits, firstParentChains);
 
-        // Build mark → list of version tags
         var tagsByCommitMark = new Dictionary<string, List<string>>();
         foreach (var tag in parseResult.Tags)
         {
@@ -314,19 +428,18 @@ public static class GitHistoryAnalyzer
             list.Add(tag.Name);
         }
 
-        // Group commits by branch, preserving fast-export topological order
         var branchCommits = new Dictionary<string, List<CommitRecord>>(StringComparer.OrdinalIgnoreCase);
         foreach (var commit in commits)
         {
-            if (!branchCommits.TryGetValue(commit.Branch, out var list))
+            var branch = commitBranch[commit.Mark];
+            if (!branchCommits.TryGetValue(branch, out var list))
             {
                 list = new List<CommitRecord>();
-                branchCommits[commit.Branch] = list;
+                branchCommits[branch] = list;
             }
             list.Add(commit);
         }
 
-        // Build mark → (branch, index) for efficient lookup
         var commitLocation = new Dictionary<string, (string branch, int index)>();
         foreach (var kvp in branchCommits)
         {
@@ -334,11 +447,11 @@ public static class GitHistoryAnalyzer
                 commitLocation[kvp.Value[i].Mark] = (kvp.Key, i);
         }
 
-        // Determine root branch (branch of the first commit with no parent)
         var rootCommit = commits.FirstOrDefault(c => c.ParentMark == null);
-        var rootBranch = rootCommit?.Branch ?? "main";
+        var rootBranch = rootCommit != null
+            ? commitBranch[rootCommit.Mark]
+            : branchCommits.Keys.OrderBy(GetBranchPriority).ThenBy(name => name, StringComparer.OrdinalIgnoreCase).FirstOrDefault() ?? "main";
 
-        // Pre-compute branch creation points: parent mark → child branches to create
         var branchCreationPoints = new Dictionary<string, List<string>>();
         foreach (var kvp in branchCommits)
         {
@@ -349,11 +462,12 @@ public static class GitHistoryAnalyzer
             if (branchList.Count == 0 || branchList[0].ParentMark == null)
                 continue;
 
-            var parentMark = branchList[0].ParentMark!;
+            var parentMark = branchList[0].ParentMark;
+            if (parentMark == null)
+                continue;
 
-            // Only register as a branch creation if the parent is on a different branch
-            if (commitLocation.TryGetValue(parentMark, out var parentLoc) &&
-                string.Equals(parentLoc.branch, branch, StringComparison.OrdinalIgnoreCase))
+            if (commitLocation.TryGetValue(parentMark, out var parentLoc)
+                && string.Equals(parentLoc.branch, branch, StringComparison.OrdinalIgnoreCase))
                 continue;
 
             if (!branchCreationPoints.TryGetValue(parentMark, out var children))
@@ -367,7 +481,6 @@ public static class GitHistoryAnalyzer
         foreach (var kvp in branchCreationPoints)
             kvp.Value.Sort((a, b) => GetBranchPriority(a).CompareTo(GetBranchPriority(b)));
 
-        // Per-branch progress tracker
         var processedIndex = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         foreach (var branch in branchCommits.Keys)
             processedIndex[branch] = -1;
@@ -379,7 +492,9 @@ public static class GitHistoryAnalyzer
 
         void FlushPending()
         {
-            if (pendingCommits <= 0) return;
+            if (pendingCommits <= 0)
+                return;
+
             steps.Add(BuilderStep.Commits(pendingCommits));
             pendingCommits = 0;
         }
@@ -388,6 +503,7 @@ public static class GitHistoryAnalyzer
         {
             if (string.Equals(builderBranch, targetBranch, StringComparison.OrdinalIgnoreCase))
                 return;
+
             FlushPending();
             steps.Add(BuilderStep.Checkout(targetBranch));
             builderBranch = targetBranch;
@@ -397,6 +513,7 @@ public static class GitHistoryAnalyzer
         {
             if (!branchCommits.TryGetValue(branch, out var branchList))
                 return;
+
             if (targetIndex >= branchList.Count)
                 targetIndex = branchList.Count - 1;
 
@@ -413,12 +530,11 @@ public static class GitHistoryAnalyzer
                 }
                 else if (commit.MergeMarks.Count > 0)
                 {
-                    // Advance each merge source branch before merging
                     foreach (var mergeMark in commit.MergeMarks)
                     {
-                        if (commitLocation.TryGetValue(mergeMark, out var sourceLoc) &&
-                            processedIndex.TryGetValue(sourceLoc.branch, out var sourceProgress) &&
-                            sourceProgress < sourceLoc.index)
+                        if (commitLocation.TryGetValue(mergeMark, out var sourceLoc)
+                            && processedIndex.TryGetValue(sourceLoc.branch, out var sourceProgress)
+                            && sourceProgress < sourceLoc.index)
                         {
                             ProcessBranchTo(sourceLoc.branch, sourceLoc.index);
                         }
@@ -431,7 +547,8 @@ public static class GitHistoryAnalyzer
                     {
                         var sourceBranch = commitLocation.TryGetValue(mergeMark, out var loc)
                             ? loc.branch
-                            : "unknown";
+                            : commitBranch.TryGetValue(mergeMark, out var mappedBranch) ? mappedBranch : "unknown";
+
                         steps.Add(BuilderStep.Merge(sourceBranch));
                     }
                 }
@@ -441,7 +558,6 @@ public static class GitHistoryAnalyzer
                     pendingCommits++;
                 }
 
-                // Tags on this commit
                 if (tagsByCommitMark.TryGetValue(commit.Mark, out var tags))
                 {
                     FlushPending();
@@ -449,7 +565,6 @@ public static class GitHistoryAnalyzer
                         steps.Add(BuilderStep.Tag(tag));
                 }
 
-                // Eagerly process child branches created at this commit
                 if (branchCreationPoints.TryGetValue(commit.Mark, out var children))
                 {
                     FlushPending();
@@ -457,6 +572,7 @@ public static class GitHistoryAnalyzer
                     {
                         if (createdBranches.Contains(child))
                             continue;
+
                         EnsureOnBranch(branch);
                         steps.Add(BuilderStep.Branch(child));
                         createdBranches.Add(child);
@@ -471,17 +587,16 @@ public static class GitHistoryAnalyzer
             FlushPending();
         }
 
-        // Process root branch first (depth-first recursion handles reachable branches)
         if (branchCommits.ContainsKey(rootBranch))
             ProcessBranchTo(rootBranch, branchCommits[rootBranch].Count - 1);
 
-        // Process any branches not reached by the depth-first walk
         foreach (var branch in branchCommits.Keys.OrderBy(GetBranchPriority))
         {
-            if (!branchCommits.TryGetValue(branch, out var bc))
+            if (!branchCommits.TryGetValue(branch, out var branchList))
                 continue;
-            if (processedIndex[branch] < bc.Count - 1)
-                ProcessBranchTo(branch, bc.Count - 1);
+
+            if (processedIndex[branch] < branchList.Count - 1)
+                ProcessBranchTo(branch, branchList.Count - 1);
         }
 
         FlushPending();
