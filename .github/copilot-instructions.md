@@ -9,6 +9,9 @@ Learn more: <https://code.visualstudio.com/docs/copilot/customization/custom-ins
 # General Guidelines
 - Do not make code changes unless explicitly requested by the user; when discussing possible fixes, provide recommendations without applying edits automatically.
 
+# Tool Installation
+- The tool must be installed from actual compiler/build output locations (e.g., project bin output), not from an invented artifacts path, as it has not been published to NuGet yet.
+
 # Coding Standards
 
 - Follow C# coding conventions (PascalCase for classes/methods, camelCase for variables and member fields)
@@ -103,6 +106,7 @@ For different UI thread marshalling scenarios, use the appropriate abstraction:
 - **Command execution** (AsyncRelayCommand): Use `IUiThreadDispatcher` - This is the TA.Utils.Core.MVVM pattern
 
 Both solve the same problem (UI thread marshalling) but for different contexts:
+
 ```csharp
 // For Rx observable sequences:
 eventBus.Observe<Message>()
@@ -221,3 +225,4 @@ The `.Property()` approach:
 # Fixture Generation
 
 - For this repository, the snapshot command must continue generating C# fixture code; only the topology extraction method should change (use git fast-export parsing instead of git log heuristics).
+- The snapshot mode should be invokable via a `--snapshot` flag to avoid positional-argument ambiguity.

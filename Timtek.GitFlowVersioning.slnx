@@ -12,6 +12,9 @@
     <File Path="docs/index.md" />
     <File Path="docs/version-variables.md" />
   </Folder>
+  <Folder Name="/scripts/">
+    <File Path="scripts/Reinstall-GitFlowVersionTool.ps1" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/Timtek.GitFlowVersion.Tool/Timtek.GitFlowVersion.Tool.csproj" />
     <Project Path="src/Timtek.GitFlowVersioning/Timtek.GitFlowVersion.csproj" />

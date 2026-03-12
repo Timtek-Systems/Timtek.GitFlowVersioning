@@ -20,6 +20,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommandLineParser" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Timtek.GitFlowVersioning\Timtek.GitFlowVersion.csproj" />
   </ItemGroup>
 

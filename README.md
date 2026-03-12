@@ -118,7 +118,7 @@ The tool outputs a JSON object containing all computed version variables:
 To capture a deterministic replay fixture from a real repository:
 
 ```shell
-dotnet gitflowversion snapshot /path/to/other/repo ./fixtures/release-1.2.3.json
+dotnet gitflowversion --snapshot --repository /path/to/other/repo --output ./fixtures/release-1.2.3.json
 ```
 
 The generated snapshot stores the captured `CommitInfo` and `ExpectedVersion`

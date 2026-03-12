@@ -50,13 +50,13 @@ dotnet gitflowversion /path/to/repo
 Capture a repository's structure as a replayable integration test fixture:
 
 ```shell
-dotnet gitflowversion snapshot
+dotnet gitflowversion --snapshot
 ```
 
 Capture another repository and write the fixture to a file:
 
 ```shell
-dotnet gitflowversion snapshot /path/to/other/repo ./fixtures/release-1.2.3.json
+dotnet gitflowversion --snapshot --repository /path/to/other/repo --output ./fixtures/release-1.2.3.json
 ```
 
 The snapshot analyzes the repository topology and outputs C# code that can be
