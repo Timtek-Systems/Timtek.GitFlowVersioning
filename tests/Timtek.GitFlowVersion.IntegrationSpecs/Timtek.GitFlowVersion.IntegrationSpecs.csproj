@@ -1,4 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Integration tests create temporary physical Git repositories and rely on
+    a git executable being present. They must NOT run in CI builds (GitHub
+    Actions). Only tests/Timtek.GitFlowVersioning.Specs is run by the CI
+    workflow. Run this project locally only.
+  -->
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <IsPackable>false</IsPackable>
