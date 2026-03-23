@@ -360,6 +360,12 @@ public static class GitHistoryAnalyzer
 
         foreach (var commit in commits)
         {
+            if (!string.IsNullOrWhiteSpace(commit.PreferredBranch))
+            {
+                assignment[commit.Mark] = commit.PreferredBranch!;
+                continue;
+            }
+
             string? bestBranch = null;
             var bestPriority = int.MaxValue;
 
@@ -375,9 +381,6 @@ public static class GitHistoryAnalyzer
                 bestPriority = priority;
                 bestBranch = branch;
             }
-
-            if (bestBranch == null && !string.IsNullOrWhiteSpace(commit.PreferredBranch))
-                bestBranch = commit.PreferredBranch;
 
             assignment[commit.Mark] = bestBranch ?? branchesByPriority.FirstOrDefault() ?? "main";
         }

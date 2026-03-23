@@ -15,20 +15,7 @@ class when_building_a_sample_repository_for_examination : With_end_to_end_versio
 
     Establish context = () => Context = Builder
         .WithInitialCommit()
-        .WithCommits(1)
-        .WithBranch("master")
-        .WithCommits(1)
-        .WithTag("0.1.0")
-        .WithCommits(1)
-        .OnBranch("main")
-        .WithCommits(1)
-        .OnBranch("master")
-        .MergeFrom("main")
-        .WithCommits(2)
-        .WithTag("0.1.2")
-        .WithCommits(1)
-        .OnBranch("main")
-        .WithCommits(7)
+        .WithCommits(9)
         .WithBranch("develop")
         .OnBranch("main")
         .WithCommits(9)
@@ -36,8 +23,15 @@ class when_building_a_sample_repository_for_examination : With_end_to_end_versio
         .OnBranch("develop")
         .MergeFrom("main")
         .WithBranch("release/1.0.1")
+        .WithCommits(3)
+        .MergeFrom("release/1.0.1")
+        .OnBranch("main")
+        .WithCommits(1)
+        .WithTag("0.1.0")
+        .WithCommits(1)
+        .MergeFrom("main")
         .WithCommits(2)
-        .MergeFrom("master")
+        .OnBranch("release/1.0.1")
         .Build();
 
     Because of = () =>
