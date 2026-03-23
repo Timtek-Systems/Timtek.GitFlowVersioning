@@ -1,4 +1,4 @@
-namespace Timtek.GitFlowVersioning.Versioning;
+namespace Timtek.GitFlowVersion.Versioning;
 
 /// <summary>Holds raw information gathered from the git repository for the current commit.</summary>
 public sealed class GitCommitInfo

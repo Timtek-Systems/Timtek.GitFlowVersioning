@@ -1,4 +1,4 @@
-namespace Timtek.GitFlowVersioning.Versioning;
+namespace Timtek.GitFlowVersion.Versioning;
 
 /// <summary>Computes <see cref="VersionInfo"/> from raw <see cref="GitCommitInfo"/>.</summary>
 public static class VersionCalculator
@@ -10,8 +10,9 @@ public static class VersionCalculator
     /// <returns>A fully populated <see cref="VersionInfo"/>.</returns>
     public static VersionInfo Calculate(GitCommitInfo commitInfo)
     {
-        var baseVersion = ParseBaseVersion(commitInfo.BaseVersionTag);
+        var parsedBaseVersion = ParseBaseVersion(commitInfo.BaseVersionTag);
         var branchType = BranchClassifier.Classify(commitInfo.BranchName);
+        var baseVersion = ResolveBaseVersion(parsedBaseVersion, branchType, commitInfo.BranchName);
         var distance = commitInfo.CommitDistance;
 
         return branchType switch
@@ -20,6 +21,8 @@ public static class VersionCalculator
             BranchType.Release => BuildPrereleaseVersion(baseVersion, distance, "beta", commitInfo),
             BranchType.Hotfix  => BuildPrereleaseVersion(baseVersion, distance, "beta", commitInfo),
             BranchType.Develop => BuildDevelopVersion(baseVersion, distance, commitInfo),
+            _ when IsExactTaggedCommit(commitInfo)
+                               => BuildMainVersion(baseVersion, distance, commitInfo),
             _                  => BuildPrereleaseVersion(baseVersion, distance, "alpha", commitInfo),
         };
     }
@@ -119,6 +122,25 @@ public static class VersionCalculator
 
     private static string EscapeBranchName(string branchName) =>
         branchName.Replace("/", "-");
+
+    private static Version ResolveBaseVersion(Version tagBaseVersion, BranchType branchType, string branchName)
+    {
+        if (branchType is not (BranchType.Release or BranchType.Hotfix))
+            return tagBaseVersion;
+
+        var slashIndex = branchName.IndexOf('/');
+        if (slashIndex < 0 || slashIndex == branchName.Length - 1)
+            return tagBaseVersion;
+
+        var versionText = branchName.Substring(slashIndex + 1);
+        if (!Version.TryParse(versionText, out var parsedBranchVersion))
+            return tagBaseVersion;
+
+        return new Version(parsedBranchVersion.Major, parsedBranchVersion.Minor, parsedBranchVersion.Build < 0 ? 0 : parsedBranchVersion.Build);
+    }
+
+    private static bool IsExactTaggedCommit(GitCommitInfo commitInfo) =>
+        commitInfo.HasTag && commitInfo.CommitDistance == 0;
 
     private static Version ParseBaseVersion(string tag)
     {

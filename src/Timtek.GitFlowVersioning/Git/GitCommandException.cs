@@ -1,4 +1,4 @@
-namespace Timtek.GitFlowVersioning.Git;
+namespace Timtek.GitFlowVersion.Git;
 
 /// <summary>Thrown when a git CLI command exits with a non-zero exit code.</summary>
 public class GitCommandException : Exception

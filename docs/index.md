@@ -1,4 +1,4 @@
-# Timtek.GitFlowVersioning
+# Timtek.GitFlowVersion
 
 **Automatic semantic versioning for .NET projects that follow GitFlow — zero configuration required.**
 
@@ -12,7 +12,7 @@ require significant setup before they produce a useful version number.
 For teams that have already committed to [GitFlow](https://nvie.com/posts/a-successful-git-branching-model/),
 all of that flexibility is overhead.
 
-`Timtek.GitFlowVersioning` takes the opposite approach.
+`Timtek.GitFlowVersion` takes the opposite approach.
 It is an **opinionated** tool that delivers a **single, specific use-case** and
 deliberately excludes everything else:
 
@@ -36,7 +36,7 @@ with the correct [SemVer 2.0](https://semver.org/) version — automatically.
 
 ```shell
 # Install — this is the only step
-dotnet add package Timtek.GitFlowVersioning
+dotnet add package Timtek.GitFlowVersion
 ```
 
 From this point on, every `dotnet build` and `dotnet pack` produces correctly versioned

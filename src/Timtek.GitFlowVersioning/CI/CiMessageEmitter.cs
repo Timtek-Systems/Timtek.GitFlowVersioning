@@ -1,8 +1,6 @@
-using System;
-using System.IO;
-using Timtek.GitFlowVersioning.Versioning;
+using Timtek.GitFlowVersion.Versioning;
 
-namespace Timtek.GitFlowVersioning.CI;
+namespace Timtek.GitFlowVersion.CI;
 
 /// <summary>Emits CI-specific service messages for TeamCity and GitHub Actions.</summary>
 public static class CiMessageEmitter

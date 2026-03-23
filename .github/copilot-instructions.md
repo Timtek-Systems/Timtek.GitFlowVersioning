@@ -6,6 +6,11 @@ These instructions are automatically included in Copilot chat conversations.
 Learn more: <https://code.visualstudio.com/docs/copilot/customization/custom-instructions>
 -->
 
+# General Guidelines
+- Do not make code changes unless explicitly requested by the user; when discussing possible fixes, provide recommendations without applying edits automatically.
+
+# Tool Installation
+- The tool must be installed from actual compiler/build output locations (e.g., project bin output), not from an invented artifacts path, as it has not been published to NuGet yet.
 
 # Coding Standards
 
@@ -50,7 +55,7 @@ It is important that code is kept simple and easy to read and understand. The fo
 - Aim for minimum 90% coverage, but recognise that full coverage is not always achievable or desirable.
 - Spec class names should fully describe the test context. The "when_*" class name should fully describe the test context and not rely on the file name for context. For example, a spec named `when_mid_is_valid` should be renamed to a more descriptive name like `when_updating_a_gen2_device_in_production_mode_without_clearing_counters_and_MID_is_valid` to provide full context in the test runner display.
 - Passing tests are contracts. When adding new code, if a previously-passing spec breaks, this may indicate a regression or unintended side effect. Such breakages should be flagged for review and discussion before changing any code or tests.
-- MSpec delegates (Establish, Because, It, Cleanup) must be synchronous. All delegates must execute synchronously because MSpec does not support async delegates.
+- MSpec delegates (Establish, Because, It, Cleanup) must be synchronous. All delegates must execute synchronously because MSpec does not support async delegates. **Establish should be a single expression that builds the context. Because is where the unit under test gets exercised. Additional setup logic (like copying directories) belongs in Because, not Establish. Each It assertion should also be a single expression.**
 - Use a Context-Builder pattern, where each test class has a Context object containing the test data, results, services, etc. and a Builder object used to build the context for the test. The Establish clause should be a single statement where possible, similar to: `Establish context = () => Context = Builder.WithSomeScenario().Build();`. For efficiency, tests that share a common context should inherit from a base class named `With_{context_name}` that provides common setup and utilities and that's where the Context-Builder pattern should be established.
 
 # Internal Conventions
@@ -101,6 +106,7 @@ For different UI thread marshalling scenarios, use the appropriate abstraction:
 - **Command execution** (AsyncRelayCommand): Use `IUiThreadDispatcher` - This is the TA.Utils.Core.MVVM pattern
 
 Both solve the same problem (UI thread marshalling) but for different contexts:
+
 ```csharp
 // For Rx observable sequences:
 eventBus.Observe<Message>()
@@ -118,6 +124,10 @@ var command = new AsyncRelayCommand(
 ## Do not run publish unless specifically requested
 
 To avoid unintentional releases, the `dotnet publish` command should not be run as part of regular development or build processes unless there is a specific need to create a published output (e.g., for deployment or distribution). Instead, focus on building and testing the codebase.
+
+## Use the correct command for GitFlowVersion
+
+The dotnet global tool command name must be invoked as `dotnet gitflowversion` (not via a shim like `gitflowversion`). The ToolCommandName in the .csproj should be set to `dotnet-gitflowversion`, which allows the `dotnet gitflowversion` invocation pattern. Avoid shim-based invocation where possible because anti-malware sandboxing can block shim executables. When asked to re-register Timtek.GitFlowVersion.Tool, prefer global registration only (not local manifest), because the tool runs against other repositories and local registration provides no utility.
 
 # MVVM Conventions
 
@@ -211,3 +221,8 @@ The `.Property()` approach:
 # Versioning Conventions
 
 - Git release tags use bare semantic versions (e.g., "1.0.0") without a "v" prefix.
+
+# Fixture Generation
+
+- For this repository, the snapshot command must continue generating C# fixture code; only the topology extraction method should change (use git fast-export parsing instead of git log heuristics).
+- The snapshot mode should be invokable via a `--snapshot` flag to avoid positional-argument ambiguity.

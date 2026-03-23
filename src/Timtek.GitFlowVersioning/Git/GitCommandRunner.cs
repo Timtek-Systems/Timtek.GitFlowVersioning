@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Timtek.GitFlowVersioning.Git;
+namespace Timtek.GitFlowVersion.Git;
 
 /// <summary>Runs git CLI commands and returns their output.</summary>
 public static class GitCommandRunner

@@ -7,6 +7,25 @@ These are exposed in three ways:
 2. **Generated `GitVersionInformation` class** — compiled into your assembly as `internal static` constants.
 3. **Standard .NET assembly attributes** — `AssemblyVersion`, `AssemblyFileVersion`, and `AssemblyInformationalVersion`.
 
+## Numbered Versioning Scenarios (`SemVer`)
+
+The table below lists the expected `SemVer` output for all supported branch modes and edge cases.
+
+| Scenario | Branch / Context | Base Version Source | Distance Source | Example Inputs | Expected `SemVer` |
+|---:|---|---|---|---|---|
+| 1 | Exact tagged commit (`distance = 0`) on `main` | Tag | Tag distance (`0`) | Tag: `1.2.3`, Branch: `main` | `1.2.3` |
+| 2 | Exact tagged commit in detached/tag context | Tag | Tag distance (`0`) | Tag: `1.0.1`, Branch: `tags/1.0.1` | `1.0.1` |
+| 3 | `main` ahead of latest tag | Tag | Tag distance | Tag: `1.2.3`, Distance: `5` | `1.2.8` |
+| 4 | `develop` | Tag (minor + 1, patch reset to `0`) | Tag distance | Tag: `1.2.3`, Distance: `7` | `1.3.0-alpha.7` |
+| 5 | `release/<semver>` | Branch suffix (`<semver>`) | Commits since merge-base with `develop` | Branch: `release/1.3.0`, Distance: `3` | `1.3.0-beta.3` |
+| 6 | `release/<non-semver>` | Tag fallback | Commits since merge-base with `develop` | Branch: `release/candidate`, Tag: `1.2.3`, Distance: `2` | `1.2.3-beta.2` |
+| 7 | `hotfix/<semver>` | Branch suffix (`<semver>`) | Commits since merge-base with `main`/`master` | Branch: `hotfix/1.2.4`, Distance: `1` | `1.2.4-beta.1` |
+| 8 | `hotfix/<non-semver>` | Tag fallback | Commits since merge-base with `main`/`master` | Branch: `hotfix/fix-critical`, Tag: `1.2.3`, Distance: `2` | `1.2.3-beta.2` |
+| 9 | Other branches (`feature/*`, `bugfix/*`, etc.) | Tag | Tag distance | Branch: `feature/new-ui`, Tag: `1.2.3`, Distance: `10` | `1.2.3-alpha.10` |
+| 10 | No matching version tags on `main` | Fallback `0.1.0` | Repository commit count fallback | Branch: `main`, Count: `4` | `0.1.4` |
+| 11 | No matching version tags on `develop` | Fallback `0.1.0` (then minor + 1) | Repository commit count fallback | Branch: `develop`, Count: `4` | `0.2.0-alpha.4` |
+| 12 | No matching version tags on other branches | Fallback `0.1.0` | Repository commit count fallback | Branch: `feature/test`, Count: `4` | `0.1.0-alpha.4` |
+
 ## Complete Variable Reference
 
 The following example assumes a repository on the `develop` branch with the most recent
@@ -76,4 +95,3 @@ for safe, typed access at runtime:
 ```csharp
 var version = GitVersion.GitInformationalVersion;
 Console.WriteLine(version);  // "1.2.3+5.Branch.main.Sha.a1b2c3d..."
-```

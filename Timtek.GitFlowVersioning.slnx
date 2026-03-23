@@ -12,11 +12,15 @@
     <File Path="docs/index.md" />
     <File Path="docs/version-variables.md" />
   </Folder>
+  <Folder Name="/scripts/">
+    <File Path="scripts/Reinstall-GitFlowVersionTool.ps1" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/Timtek.GitFlowVersion.Tool/Timtek.GitFlowVersion.Tool.csproj" />
-    <Project Path="src/Timtek.GitFlowVersioning/Timtek.GitFlowVersioning.csproj" />
+    <Project Path="src/Timtek.GitFlowVersioning/Timtek.GitFlowVersion.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Timtek.GitFlowVersion.IntegrationSpecs/Timtek.GitFlowVersion.IntegrationSpecs.csproj" />
     <Project Path="tests/Timtek.GitFlowVersioning.Specs/Timtek.GitFlowVersioning.Specs.csproj" />
     <Project Path="tests/Timtek.GitFlowVersioning.TestSubject/Timtek.GitFlowVersioning.TestSubject.csproj" />
   </Folder>
