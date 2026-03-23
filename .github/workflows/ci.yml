@@ -46,7 +46,7 @@ jobs:
           echo "::notice title=GitFlowVersion::SemVer=$SEMVER FullSemVer=$FULL_SEMVER"
 
       - name: Test
-        run: dotnet test Timtek.GitFlowVersioning.slnx --no-build --configuration ${{ env.CONFIGURATION }} --logger trx --results-directory TestResults
+        run: dotnet test tests/Timtek.GitFlowVersioning.Specs/Timtek.GitFlowVersioning.Specs.csproj --no-build --configuration ${{ env.CONFIGURATION }} --logger trx --results-directory TestResults
 
       - name: Upload test results
         if: always()
@@ -57,7 +57,7 @@ jobs:
 
       - name: Pack versioning package
         run: >
-          dotnet pack src/Timtek.GitFlowVersioning/Timtek.GitFlowVersioning.csproj
+          dotnet pack src/Timtek.GitFlowVersioning/Timtek.GitFlowVersion.csproj
           --no-build --configuration ${{ env.CONFIGURATION }} --output nupkgs
           -p:PackageVersion=${{ steps.version.outputs.semver }}
           -p:Version=${{ steps.version.outputs.semver }}
