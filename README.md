@@ -118,12 +118,12 @@ The tool outputs a JSON object containing all computed version variables:
 To capture a deterministic replay fixture from a real repository:
 
 ```shell
-dotnet gitflowversion --snapshot --repository /path/to/other/repo --output ./fixtures/release-1.2.3.json
+dotnet gitflowversion --snapshot --repository /path/to/other/repo --output ./fixtures/release-1.2.3.cs
 ```
 
-The generated snapshot stores the captured `CommitInfo` and `ExpectedVersion`
-so the scenario can be replayed in tests without depending on the original Git
-history.
+The generated snapshot produces a C# MSpec test fixture containing the builder steps
+needed to replay the repository topology and an assertion for the expected `SemVer`,
+so the scenario can be replayed in tests without depending on the original Git history.
 
 ## Accessing Version Information at Runtime
 
@@ -167,8 +167,13 @@ The task is designed to never fail a build. If it cannot compute a version for a
 
 ## Documentation
 
-For complete installation instructions, usage examples, CI integration patterns, and detailed reference documentation, see the files in `docs/`.
+Full documentation lives in the Obsidian vault at [`docs/Timtek.GitFlowVersion/`](docs/Timtek.GitFlowVersion/).
 
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
+| Document | Contents |
+|---|---|
+| [Getting Started](docs/Timtek.GitFlowVersion/Getting%20Started.md) | Installation, first build, tagging releases |
+| [CLI Tool](docs/Timtek.GitFlowVersion/CLI%20Tool.md) | Standalone version computation, JSON output, snapshot capture |
+| [How It Works](docs/Timtek.GitFlowVersion/How%20It%20Works.md) | Branch classification, version computation, MSBuild integration |
+| [Version Variables](docs/Timtek.GitFlowVersion/Version%20Variables.md) | Complete variable reference and MSBuild property mapping |
+| [CI Integration](docs/Timtek.GitFlowVersion/CI%20Integration.md) | GitHub Actions and TeamCity setup |
+| [FAQ](docs/Timtek.GitFlowVersion/FAQ.md) | Common questions and troubleshooting |

@@ -1,6 +1,6 @@
 # CI Integration
 
-`Timtek.GitFlowVersioning` automatically detects supported CI environments and emits
+`Timtek.GitFlowVersion` automatically detects supported CI environments and emits
 service messages so that the computed version is visible in build logs and available
 to downstream steps.
 
@@ -40,9 +40,9 @@ Always use `fetch-depth: 0`:
     fetch-depth: 0
 ```
 
-!!! warning "Shallow clones"
-    Without `fetch-depth: 0`, the task may not find version tags and will fall back
-    to `0.0.0-unversioned`. This is the most common cause of unexpected versions in CI.
+> [!warning] Shallow clones
+> Without `fetch-depth: 0`, the task may not find version tags and will fall back
+> to `0.0.0-unversioned`. This is the most common cause of unexpected versions in CI.
 
 ### Detached HEAD
 
@@ -81,15 +81,15 @@ For CI systems that are not explicitly supported, the task still sets all MSBuil
 version properties. The version is visible in the build output log and can be
 captured from the `Version` or `PackageVersion` MSBuild properties.
 
-Alternatively, use the [CLI tool](cli-tool.md) to compute the version independently
-of MSBuild and pass it to downstream steps:
+Alternatively, use the CLI tool to compute the version independently of MSBuild
+and pass it to downstream steps:
 
 ```bash
 SEMVER=$(dotnet gitflowversion | jq -r '.SemVer')
 dotnet pack -p:PackageVersion=$SEMVER
 ```
 
-See the [CLI Tool](cli-tool.md) page for full installation and usage details.
+See [[Getting Started]] for CLI tool installation details.
 
 If you need to extract the version purely from MSBuild, you can add a custom target
 that writes it to a file:
@@ -101,3 +101,9 @@ that writes it to a file:
                     Overwrite="true" />
 </Target>
 ```
+
+## See Also
+
+- [[Getting Started]] — CLI tool installation and usage
+- [[Version Variables]] — full list of variables available to CI pipelines
+- [[FAQ]] — common CI troubleshooting questions

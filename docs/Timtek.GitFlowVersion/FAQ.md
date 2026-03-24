@@ -7,7 +7,7 @@
 Those are excellent, widely-used tools. They support many branching strategies,
 extensive configuration, and a broad range of scenarios.
 
-`Timtek.GitFlowVersioning` exists because we wanted something simpler.
+`Timtek.GitFlowVersion` exists because we wanted something simpler.
 Our projects all use GitFlow, and we found ourselves writing the same
 configuration files and debugging the same edge cases across dozens of repositories.
 
@@ -55,8 +55,10 @@ It depends on the branch type:
 |---|---|
 | `main` | Added to the patch component (`1.2.0` + 3 commits = `1.2.3`) |
 | `develop` | Becomes the pre-release number (`1.3.0-alpha.5`) |
-| `release/*` / `hotfix/*` | Becomes the pre-release number (`1.3.0-beta.4`) |
+| `release/*` / `hotfix/*` | Becomes the pre-release number (`1.3.0-beta.4`), measured from the merge-base |
 | Other | Becomes the pre-release number (`1.3.0-alpha.7`) |
+
+See [[How It Works]] for a full explanation of each branch's versioning formula.
 
 ### What version is produced on `develop`?
 
@@ -103,7 +105,7 @@ This means the task could not compute a version. Common causes:
    The task walks up from the project directory looking for a `.git` folder.
 
 3. **Shallow clone in CI.**
-   Use `fetch-depth: 0` in your checkout step.
+   Use `fetch-depth: 0` in your checkout step. See [[CI Integration]] for details.
 
 4. **No commits in the repository.**
    The task requires at least one commit.
@@ -140,6 +142,8 @@ Ensure your CI checkout fetches full history:
     fetch-depth: 0
 ```
 
+See [[CI Integration]] for platform-specific guidance.
+
 ### Does the task detect my CI system automatically?
 
 Yes. GitHub Actions and TeamCity are detected via their standard environment
@@ -148,18 +152,8 @@ No CI-specific configuration is needed.
 
 ---
 
-## Package
+## See Also
 
-### Does this add a runtime dependency to my application?
-
-No. The package is marked as a `DevelopmentDependency` with `IncludeBuildOutput=false`.
-It participates only during MSBuild and does not add any DLLs or references to your
-application's output.
-
-### Can I use this with .NET Framework projects?
-
-The MSBuild task targets .NET Standard 2.0, so it can be loaded by both the .NET SDK
-(`dotnet build`) and the full MSBuild (`msbuild.exe`) shipped with Visual Studio.
-
-SDK-style project files are required. Legacy `.csproj` files (with `<Import>` of
-`Microsoft.CSharp.targets`) are not supported.
+- [[How It Works]] — detailed version computation rules
+- [[Version Variables]] — complete variable reference
+- [[CI Integration]] — CI-specific configuration and troubleshooting

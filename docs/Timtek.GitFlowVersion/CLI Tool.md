@@ -8,8 +8,13 @@ capturing deterministic test fixtures from real repositories.
 
 ## Installation
 
-Install the tool as a **local dotnet tool** so it is available to anyone who
-clones the repository:
+Install the tool globally so it is available across all repositories:
+
+```shell
+dotnet tool install --global Timtek.GitFlowVersion.Tool
+```
+
+You can also install it as a local dotnet tool tied to a specific repository:
 
 ```shell
 dotnet new tool-manifest   # only needed once per repository
@@ -21,12 +26,6 @@ to source control. Other developers (and CI agents) can then restore it with:
 
 ```shell
 dotnet tool restore
-```
-
-You can also install it globally:
-
-```shell
-dotnet tool install --global Timtek.GitFlowVersion.Tool
 ```
 
 In either case, invoke it as `dotnet gitflowversion`.
@@ -56,7 +55,7 @@ dotnet gitflowversion --snapshot
 Capture another repository and write the fixture to a file:
 
 ```shell
-dotnet gitflowversion --snapshot --repository /path/to/other/repo --output ./fixtures/release-1.2.3.json
+dotnet gitflowversion --snapshot --repository /path/to/other/repo --output ./fixtures/release-1.2.3.cs
 ```
 
 The snapshot analyzes the repository topology and outputs C# code that can be
@@ -113,25 +112,25 @@ The default command prints a JSON object containing every computed version varia
 ```
 
 The variables are identical to those produced by the MSBuild task.
-See the [Version Variables](version-variables.md) page for a complete reference.
+See [[Version Variables]] for a complete reference.
 
 ## Extracting Values in Scripts
 
-The JSON output is designed to be parsed with standard tools like `jq`:
+The JSON output is designed to be parsed with standard tools.
 
-=== "Bash"
+Bash / `jq`:
 
-    ```bash
-    SEMVER=$(dotnet gitflowversion | jq -r '.SemVer')
-    echo "Version is $SEMVER"
-    ```
+```bash
+SEMVER=$(dotnet gitflowversion | jq -r '.SemVer')
+echo "Version is $SEMVER"
+```
 
-=== "PowerShell"
+PowerShell:
 
-    ```powershell
-    $version = dotnet gitflowversion | ConvertFrom-Json
-    Write-Host "Version is $($version.SemVer)"
-    ```
+```powershell
+$version = dotnet gitflowversion | ConvertFrom-Json
+Write-Host "Version is $($version.SemVer)"
+```
 
 ## CI Usage
 
@@ -148,7 +147,7 @@ pattern:
 - name: Setup .NET
   uses: actions/setup-dotnet@v4
   with:
-    dotnet-version: 9.x
+    dotnet-version: 8.x
 
 - name: Restore tools
   run: dotnet tool restore
@@ -170,11 +169,11 @@ pattern:
     -p:PackageVersion=${{ steps.version.outputs.semver }}
 ```
 
-!!! tip "Bootstrapping"
-    The CLI tool solves a bootstrapping problem: a repository that *produces*
-    the versioning MSBuild task cannot consume its own package to version itself.
-    The tool provides the same version computation without depending on the
-    MSBuild integration.
+> [!tip] Bootstrapping
+> The CLI tool solves a bootstrapping problem: a repository that *produces*
+> the versioning MSBuild task cannot consume its own package to version itself.
+> The tool provides the same version computation without depending on the
+> MSBuild integration.
 
 ## Migration Note
 
@@ -197,3 +196,9 @@ non-zero exit code on error so that CI scripts can detect and handle failures.
 - .NET 8.0 runtime or later.
 - Git must be available on the `PATH`.
 - The target directory must be inside a Git repository with at least one commit.
+
+## See Also
+
+- [[Version Variables]] — full JSON output field reference
+- [[CI Integration]] — MSBuild-based CI patterns and GitHub Actions / TeamCity setup
+- [[Getting Started]] — MSBuild package installation

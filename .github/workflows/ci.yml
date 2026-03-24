@@ -18,12 +18,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # full history for versioning
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 9.x
 
@@ -46,18 +46,18 @@ jobs:
           echo "::notice title=GitFlowVersion::SemVer=$SEMVER FullSemVer=$FULL_SEMVER"
 
       - name: Test
-        run: dotnet test Timtek.GitFlowVersioning.slnx --no-build --configuration ${{ env.CONFIGURATION }} --logger trx --results-directory TestResults
+        run: dotnet test tests/Timtek.GitFlowVersioning.Specs/Timtek.GitFlowVersioning.Specs.csproj --no-build --configuration ${{ env.CONFIGURATION }} --logger trx --results-directory TestResults
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-results
           path: TestResults/*.trx
 
       - name: Pack versioning package
         run: >
-          dotnet pack src/Timtek.GitFlowVersioning/Timtek.GitFlowVersioning.csproj
+          dotnet pack src/Timtek.GitFlowVersioning/Timtek.GitFlowVersion.csproj
           --no-build --configuration ${{ env.CONFIGURATION }} --output nupkgs
           -p:PackageVersion=${{ steps.version.outputs.semver }}
           -p:Version=${{ steps.version.outputs.semver }}
@@ -70,7 +70,7 @@ jobs:
           -p:Version=${{ steps.version.outputs.semver }}
 
       - name: Upload NuGet packages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: nupkgs
           path: nupkgs/*.nupkg
@@ -96,7 +96,7 @@ jobs:
 
       - name: Upload test subject packages
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-subject-nupkgs
           path: test-nupkgs/*.nupkg
