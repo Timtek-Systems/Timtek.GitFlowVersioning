@@ -74,19 +74,40 @@ Base tag: 1.2.0    Distance: 12    →    Version: 1.3.0-alpha.12
 ### Release and Hotfix Branches
 
 `release/*` and `hotfix/*` branches produce **beta pre-releases**.
-The base version is used as-is and the commit distance becomes the pre-release number:
+
+**Base version:** If the branch suffix is a valid SemVer (e.g., `release/1.3.0`), that
+version is used directly as the base. Otherwise the most recent tag is used as a fallback.
+
+**Commit distance:** Rather than counting commits from the nearest tag, distance is
+measured from the **merge-base** with the parent branch — `develop` for `release/*`
+branches and `main`/`master` for `hotfix/*` branches. This counts only the commits
+that belong to the branch itself. If the merge-base cannot be determined, tag distance
+is used as a fallback.
 
 ```
-Base tag: 1.3.0    Distance: 4    →    Version: 1.3.0-beta.4
+Branch: release/1.3.0    Distance from develop merge-base: 4    →    Version: 1.3.0-beta.4
+Branch: hotfix/1.2.4     Distance from main merge-base: 1        →    Version: 1.2.4-beta.1
 ```
 
 ### Feature and Other Branches
 
-Any branch that does not match the patterns above is treated as an **alpha pre-release**,
-following the same formula as release/hotfix but with the `alpha` label:
+Any branch that does not match the patterns above is treated as an **alpha pre-release**.
+The base version is taken from the most recent tag (no minor increment) and the
+commit distance from that tag becomes the pre-release number:
 
 ```
 Base tag: 1.3.0    Distance: 7    →    Version: 1.3.0-alpha.7
+```
+
+### Exact Tagged Commits
+
+When the current commit is exactly on a version tag (commit distance is zero) and the
+branch is not one of the standard GitFlow branches, the commit is treated as a **stable
+release** regardless of branch name. This covers detached HEAD states such as those
+used by CI systems when checking out a tagged release:
+
+```
+Branch: tags/1.2.3    Tag: 1.2.3    Distance: 0    →    Version: 1.2.3
 ```
 
 ## Tag Format
@@ -134,10 +155,10 @@ An `internal static` class containing `const string` fields for every version va
 This class is compiled into your assembly but is **not visible in your source tree** —
 it exists only in the intermediate output.
 
-!!! warning "IDE may show errors"
-    Because `GitVersionInformation` does not exist until compilation, the IDE may
-    report errors if you reference it directly. Use the `GitVersion` class from
-    [`TA.Utils.Core`](https://www.nuget.org/packages/TA.Utils.Core) for safe runtime access.
+> [!warning] IDE may show errors
+> Because `GitVersionInformation` does not exist until compilation, the IDE may
+> report errors if you reference it directly. Use the `GitVersion` class from
+> [`TA.Utils.Core`](https://www.nuget.org/packages/TA.Utils.Core) for safe runtime access.
 
 ### `Timtek.GitFlowVersioning.AssemblyInfo.g.cs`
 
@@ -157,3 +178,9 @@ unreadable, or any other unexpected error occurs — it:
 
 This ensures that versioning issues surface as visible warnings without blocking
 development or CI pipelines.
+
+## See Also
+
+- [[Version Variables]] — complete reference for all computed variables and their MSBuild property names
+- [[CI Integration]] — how CI-specific service messages are emitted
+- [[FAQ]] — common questions about versioning behaviour

@@ -1,6 +1,6 @@
 # Version Variables
 
-`Timtek.GitFlowVersioning` computes a comprehensive set of version variables on every build.
+`Timtek.GitFlowVersion` computes a comprehensive set of version variables on every build.
 These are exposed in three ways:
 
 1. **MSBuild properties** — available during the build for use in targets, conditions, and pack metadata.
@@ -67,10 +67,10 @@ that are consumed by the compiler, NuGet pack, and assembly info generation:
 | `FileVersion` | `AssemblySemFileVer` | Stamped into `[AssemblyFileVersion]` |
 | `InformationalVersion` | `InformationalVersion` | Stamped into `[AssemblyInformationalVersion]` |
 
-!!! note "Explicit version override"
-    If you pass `/p:Version=X.Y.Z` on the command line (for example in a CI script),
-    the task will **not** override `Version` or `PackageVersion`. This allows CI
-    pipelines to pin a specific version when needed.
+> [!note] Explicit version override
+> If you pass `/p:Version=X.Y.Z` on the command line (for example in a CI script),
+> the task will **not** override `Version` or `PackageVersion`. This allows CI
+> pipelines to pin a specific version when needed.
 
 ## Using Variables in MSBuild
 
@@ -95,3 +95,9 @@ for safe, typed access at runtime:
 ```csharp
 var version = GitVersion.GitInformationalVersion;
 Console.WriteLine(version);  // "1.2.3+5.Branch.main.Sha.a1b2c3d..."
+```
+
+## See Also
+
+- [[How It Works]] — explains how each variable is derived from Git history
+- [[FAQ]] — common questions about version number behaviour

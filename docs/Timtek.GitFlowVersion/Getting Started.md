@@ -5,15 +5,15 @@
 Add the package to your project:
 
 ```shell
-dotnet add package Timtek.GitFlowVersioning
+dotnet add package Timtek.GitFlowVersion
 ```
 
 That is the only step. There are no configuration files to create, no properties to set,
 and no command-line flags to learn.
 
-!!! success "Zero configuration"
-    The package is deliberately designed so that installation is the *entire* setup process.
-    If you follow standard GitFlow conventions, everything works out of the box.
+> [!success] Zero configuration
+> The package is deliberately designed so that installation is the *entire* setup process.
+> If you follow standard GitFlow conventions, everything works out of the box.
 
 ## What Happens Next
 
@@ -49,9 +49,9 @@ git push origin 1.0.0
 
 Tags can use a `v` prefix (`v1.0.0`) — both formats are recognised.
 
-!!! tip "Tag placement matters"
-    Tags should be placed on `main` (or `master`). The commit distance from the nearest
-    tag drives the patch number on `main` and the pre-release number on other branches.
+> [!tip] Tag placement matters
+> Tags should be placed on `main` (or `master`). The commit distance from the nearest
+> tag drives the patch number on `main` and the pre-release number on other branches.
 
 ## Packaging
 
@@ -64,32 +64,14 @@ dotnet pack
 The resulting `.nupkg` will carry the computed `PackageVersion` without any manual
 `/p:Version=` overrides needed.
 
-## Requirements
+## CLI Tool
 
-- **Git** must be available on the system `PATH`.
-- The repository must have **at least one commit**.
-- Projects must use **SDK-style** `.csproj` files (the modern format used by `dotnet new`).
-
-## Removing or Disabling
-
-To temporarily disable versioning without removing the package, set the MSBuild property:
-
-=== "Project file"
-
-    ```xml
-    <PropertyGroup>
-      <GitFlowVersioningEnabled>false</GitFlowVersioningEnabled>
-    </PropertyGroup>
-    ```
-
-=== "Command line"
-
-    ```shell
-    dotnet build /p:GitFlowVersioningEnabled=false
-    ```
-
-To remove the package entirely:
+A standalone CLI tool is also available for computing versions on demand, without
+requiring an MSBuild build. See [[CLI Tool]] for full installation and usage details.
 
 ```shell
-dotnet remove package Timtek.GitFlowVersioning
-```
+# Install globally (recommended — the tool is useful across all repositories)
+dotnet tool install --global Timtek.GitFlowVersion.Tool
+
+# Run in any repository
+dotne

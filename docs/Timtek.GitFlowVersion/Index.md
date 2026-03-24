@@ -62,8 +62,18 @@ available for runtime introspection via the [`TA.Utils.Core`](https://www.nuget.
 
 If your workflow matches these conventions, you will never need to think about versioning again.
 
-!!! note "Not for every project"
-    This tool deliberately does not support trunk-based development, custom branch naming,
-    or version configuration files. If you need that flexibility, consider
-    [GitVersion](https://gitversion.net/) or [Nerdbank.GitVersioning](https://github.com/dotnet/Nerdbank.GitVersioning)
-    which are excellent, broadly-scoped alternatives.
+> [!note] Not for every project
+> This tool deliberately does not support trunk-based development, custom branch naming,
+> or version configuration files. If you need that flexibility, consider
+> [GitVersion](https://gitversion.net/) or [Nerdbank.GitVersioning](https://github.com/dotnet/Nerdbank.GitVersioning)
+> which are excellent, broadly-scoped alternatives.
+
+## In This Vault
+
+- [[Getting Started]] — installation and first steps
+- [[CLI Tool]] — standalone command-line tool for version computation and snapshot capture
+- [[How It Works]] — branch classification, version computation, MSBuild integration
+- [[Version Variables]] — complete variable reference and MSBuild property mapping
+- [[CI Integration]] — GitHub Actions and TeamCity setup
+- [[FAQ]] — common questions and troubleshooting
+- [[GitFlowVersion Design Specification]] — original design specification
