@@ -53,7 +53,7 @@ public class ComputeGitFlowVersionTask : Microsoft.Build.Utilities.Task
             ApplyVersionInfo(versionInfo);
             WriteGeneratedFiles(versionInfo);
             LogVersionSummary(versionInfo);
-            CiMessageEmitter.Emit(versionInfo);
+            CiMessageEmitter.Emit(versionInfo, message => Log.LogMessage(MessageImportance.High, message));
         }
         catch (Exception ex)
         {

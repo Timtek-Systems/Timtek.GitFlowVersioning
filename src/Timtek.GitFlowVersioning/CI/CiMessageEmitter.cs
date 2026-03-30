@@ -5,15 +5,20 @@ namespace Timtek.GitFlowVersion.CI;
 /// <summary>Emits CI-specific service messages for TeamCity and GitHub Actions.</summary>
 public static class CiMessageEmitter
 {
-    /// <summary>Emits CI service messages for the computed <paramref name="versionInfo"/> to stdout.</summary>
+    /// <summary>Emits CI service messages for the computed <paramref name="versionInfo"/>.</summary>
     /// <param name="versionInfo">The computed version information.</param>
-    public static void Emit(VersionInfo versionInfo)
+    /// <param name="writeLine">
+    /// A delegate that writes a single line to the build output.
+    /// In MSBuild tasks, pass <c>Log.LogMessage(MessageImportance.High, ...)</c>;
+    /// in console tools, pass <c>Console.WriteLine</c>.
+    /// </param>
+    public static void Emit(VersionInfo versionInfo, Action<string> writeLine)
     {
         if (IsTeamCity())
-            EmitTeamCityMessages(versionInfo);
+            EmitTeamCityMessages(versionInfo, writeLine);
 
         if (IsGitHubActions())
-            EmitGitHubActionsMessages(versionInfo);
+            EmitGitHubActionsMessages(versionInfo, writeLine);
     }
 
     private static bool IsTeamCity() =>
@@ -22,19 +27,19 @@ public static class CiMessageEmitter
     private static bool IsGitHubActions() =>
         !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTIONS"));
 
-    private static void EmitTeamCityMessages(VersionInfo versionInfo)
+    private static void EmitTeamCityMessages(VersionInfo versionInfo, Action<string> writeLine)
     {
-        Console.WriteLine($"##teamcity[buildNumber '{versionInfo.FullSemVer}']");
-        Console.WriteLine($"##teamcity[setParameter name='GitFlowVersion.SemVer' value='{versionInfo.SemVer}']");
-        Console.WriteLine($"##teamcity[setParameter name='GitFlowVersion.FullSemVer' value='{versionInfo.FullSemVer}']");
-        Console.WriteLine($"##teamcity[setParameter name='GitFlowVersion.InformationalVersion' value='{versionInfo.InformationalVersion}']");
+        writeLine($"##teamcity[buildNumber '{versionInfo.FullSemVer}']");
+        writeLine($"##teamcity[setParameter name='GitFlowVersion.SemVer' value='{versionInfo.SemVer}']");
+        writeLine($"##teamcity[setParameter name='GitFlowVersion.FullSemVer' value='{versionInfo.FullSemVer}']");
+        writeLine($"##teamcity[setParameter name='GitFlowVersion.InformationalVersion' value='{versionInfo.InformationalVersion}']");
     }
 
-    private static void EmitGitHubActionsMessages(VersionInfo versionInfo)
+    private static void EmitGitHubActionsMessages(VersionInfo versionInfo, Action<string> writeLine)
     {
-        Console.WriteLine($"::notice title=GitFlowVersion::FullSemVer={versionInfo.FullSemVer}");
-        Console.WriteLine($"::notice title=GitFlowVersion::SemVer={versionInfo.SemVer}");
-        Console.WriteLine($"::notice title=GitFlowVersion::InformationalVersion={versionInfo.InformationalVersion}");
+        writeLine($"::notice title=GitFlowVersion::FullSemVer={versionInfo.FullSemVer}");
+        writeLine($"::notice title=GitFlowVersion::SemVer={versionInfo.SemVer}");
+        writeLine($"::notice title=GitFlowVersion::InformationalVersion={versionInfo.InformationalVersion}");
 
         var githubOutput = Environment.GetEnvironmentVariable("GITHUB_OUTPUT");
         if (!string.IsNullOrEmpty(githubOutput))
