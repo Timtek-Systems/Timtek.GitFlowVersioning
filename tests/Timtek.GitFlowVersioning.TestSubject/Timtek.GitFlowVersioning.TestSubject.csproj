@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- Import versioning props (disables SDK assembly info generation) -->
-  <Import Project="..\..\src\Timtek.GitFlowVersioning\build\Timtek.GitFlowVersioning.props" />
+  <Import Project="..\..\src\Timtek.GitFlowVersioning\build\Timtek.GitFlowVersion.props" />
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -29,5 +29,5 @@
   </ItemGroup>
 
   <!-- Import versioning targets (defines the _ComputeGitFlowVersion target) -->
-  <Import Project="..\..\src\Timtek.GitFlowVersioning\build\Timtek.GitFlowVersioning.targets" />
+  <Import Project="..\..\src\Timtek.GitFlowVersioning\build\Timtek.GitFlowVersion.targets" />
 </Project>
