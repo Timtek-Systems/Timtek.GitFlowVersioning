@@ -15,6 +15,8 @@ public static class GitInfoGatherer
         if (branchName == "HEAD")
             branchName = TryGetBranchNameFromDetachedHead(repoRoot, sha);
 
+        branchName = NormalizeBranchName(branchName);
+
         var (baseTag, distanceFromTag, hasTag) = GetVersionFromDescribe(repoRoot);
         var distance = GetBranchAwareDistance(repoRoot, branchName, distanceFromTag);
 
@@ -27,6 +29,28 @@ public static class GitInfoGatherer
             HasTag = hasTag
         };
     }
+
+    private static string NormalizeBranchName(string branchName)
+    {
+        var normalized = branchName.Trim();
+
+        normalized = StripPrefix(normalized, "refs/heads/");
+        normalized = StripPrefix(normalized, "refs/remotes/origin/");
+        normalized = StripPrefix(normalized, "remotes/origin/");
+        normalized = StripPrefix(normalized, "origin/");
+        normalized = StripPrefix(normalized, "heads/");
+
+        var detachedSuffixIndex = normalized.IndexOfAny(new[] { '~', '^' });
+        if (detachedSuffixIndex > 0)
+            normalized = normalized.Substring(0, detachedSuffixIndex);
+
+        return normalized;
+    }
+
+    private static string StripPrefix(string value, string prefix) =>
+        value.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+            ? value.Substring(prefix.Length)
+            : value;
 
     private static int GetBranchAwareDistance(string repoRoot, string branchName, int distanceFromTag)
     {
@@ -73,8 +97,7 @@ public static class GitInfoGatherer
     {
         try
         {
-            var result = GitCommandRunner.RunCommand($"name-rev --name-only {sha}", repoRoot);
-            return result.Replace("remotes/origin/", "").Trim();
+            return GitCommandRunner.RunCommand($"name-rev --name-only {sha}", repoRoot);
         }
         catch
         {
