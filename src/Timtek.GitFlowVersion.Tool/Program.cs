@@ -68,7 +68,7 @@ static int ExecuteOptions(CliOptions options, JsonSerializerOptions jsonOptions)
     var versionInfo = VersionCalculator.Calculate(commitInfo);
     var json = JsonSerializer.Serialize(versionInfo, jsonOptions);
     Console.WriteLine(json);
-    CiMessageEmitter.Emit(versionInfo, Console.WriteLine);
+    CiMessageEmitter.Emit(versionInfo, Console.Error.WriteLine);
     return 0;
 }
 
