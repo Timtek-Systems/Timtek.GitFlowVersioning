@@ -2,6 +2,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CommandLine;
+using Timtek.GitFlowVersion.CI;
 using Timtek.GitFlowVersion.Scenarios;
 using Timtek.GitFlowVersion.Git;
 using Timtek.GitFlowVersion.Versioning;
@@ -67,6 +68,7 @@ static int ExecuteOptions(CliOptions options, JsonSerializerOptions jsonOptions)
     var versionInfo = VersionCalculator.Calculate(commitInfo);
     var json = JsonSerializer.Serialize(versionInfo, jsonOptions);
     Console.WriteLine(json);
+    CiMessageEmitter.Emit(versionInfo, Console.Error.WriteLine);
     return 0;
 }
 
