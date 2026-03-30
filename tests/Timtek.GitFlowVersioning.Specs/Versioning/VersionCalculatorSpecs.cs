@@ -138,3 +138,13 @@ class when_computing_version_for_exact_tagged_commit_in_detached_context : With_
     It should_not_have_prerelease_label = () => Result.PreReleaseLabel.ShouldBeEmpty();
     It should_have_stable_semver = () => Result.SemVer.ShouldEqual("1.0.1");
 }
+
+[Subject(typeof(VersionCalculator), "detached hotfix branch naming")]
+class when_computing_version_for_hotfix_branch_with_detached_suffix : With_git_commit_info_builder
+{
+    Establish context = () => CommitInfo = BuildCommitInfo("hotfix/3.0.1~19", "2.2.1", distance: 19);
+    Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
+    It should_use_hotfix_version_base = () => Result.MajorMinorPatch.ShouldEqual("3.0.1");
+    It should_keep_beta_label = () => Result.PreReleaseLabel.ShouldEqual("beta");
+    It should_produce_expected_semver = () => Result.SemVer.ShouldEqual("3.0.1-beta.19");
+}

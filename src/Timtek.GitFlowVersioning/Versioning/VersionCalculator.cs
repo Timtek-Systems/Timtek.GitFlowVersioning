@@ -132,7 +132,11 @@ public static class VersionCalculator
         if (slashIndex < 0 || slashIndex == branchName.Length - 1)
             return tagBaseVersion;
 
-        var versionText = branchName.Substring(slashIndex + 1);
+        var versionText = branchName.Substring(slashIndex + 1).Trim();
+        var detachedSuffixIndex = versionText.IndexOfAny(new[] { '~', '^' });
+        if (detachedSuffixIndex > 0)
+            versionText = versionText.Substring(0, detachedSuffixIndex);
+
         if (!Version.TryParse(versionText, out var parsedBranchVersion))
             return tagBaseVersion;
 
