@@ -1,5 +1,7 @@
 namespace Timtek.GitFlowVersion.Git;
 
+using System.Text.RegularExpressions;
+
 /// <summary>Gathers git commit information from a repository directory.</summary>
 public static class GitInfoGatherer
 {
@@ -105,26 +107,86 @@ public static class GitInfoGatherer
         }
     }
 
+    // These are git --match glob patterns (not .NET regular expressions).
+    // We keep them intentionally broad for candidate selection, then apply
+    // strict semantic version validation in C# via SemanticVersionTagPattern.
+    private static readonly string[] GitGlobVersionTagPatterns =
+    [
+        @"v[0-9]*.*.*",
+        @"V[0-9]*.*.*",
+        @"[0-9]*.*.*"
+    ];
+
+    private static readonly Regex SemanticVersionTagPattern = new(@"^\d+\.\d+\.\d+$", RegexOptions.CultureInvariant);
+
     private static (string baseTag, int distance, bool hasTag) GetVersionFromDescribe(string repoRoot)
     {
-        string describeOutput;
-        try
-        {
-            describeOutput = GitCommandRunner.RunCommand(@"describe --tags --long --match ""v*.*.*"" HEAD", repoRoot);
-        }
-        catch
+        foreach (var pattern in GitGlobVersionTagPatterns)
         {
             try
             {
-                describeOutput = GitCommandRunner.RunCommand(@"describe --tags --long --match ""*.*.*"" HEAD", repoRoot);
+                var describeOutput = GitCommandRunner.RunCommand($"""describe --tags --long --match "{pattern}" HEAD""", repoRoot);
+                var parsed = ParseDescribeOutput(describeOutput);
+                if (IsSemanticVersionTag(parsed.baseTag))
+                    return parsed;
             }
             catch
             {
-                return GetFallbackFromCommitCount(repoRoot);
+                // pattern did not match any reachable tag; try next pattern
             }
         }
 
-        return ParseDescribeOutput(describeOutput);
+        var nearestSemanticTag = TryGetNearestSemanticVersionTag(repoRoot);
+        if (nearestSemanticTag is { } tag)
+            return tag;
+
+        return GetFallbackFromCommitCount(repoRoot);
+    }
+
+    private static bool IsSemanticVersionTag(string tagName) => SemanticVersionTagPattern.IsMatch(tagName);
+
+    private static (string baseTag, int distance, bool hasTag)? TryGetNearestSemanticVersionTag(string repoRoot)
+    {
+        try
+        {
+            var tags = GitCommandRunner.RunCommand("tag --merged HEAD --list", repoRoot)
+                .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(tagName => new
+                {
+                    TagName = tagName,
+                    NormalizedTagName = tagName.TrimStart('v', 'V')
+                })
+                .Where(tag => IsSemanticVersionTag(tag.NormalizedTagName))
+                .Select(tag => new
+                {
+                    tag.NormalizedTagName,
+                    Distance = TryGetDistanceFromTag(repoRoot, tag.TagName),
+                    Version = Version.Parse(tag.NormalizedTagName)
+                })
+                .Where(tag => tag.Distance.HasValue)
+                .OrderBy(tag => tag.Distance!.Value)
+                .ThenByDescending(tag => tag.Version)
+                .FirstOrDefault();
+
+            return tags is null ? null : (tags.NormalizedTagName, tags.Distance!.Value, true);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static int? TryGetDistanceFromTag(string repoRoot, string tagName)
+    {
+        try
+        {
+            var distanceText = GitCommandRunner.RunCommand($"rev-list --count \"{tagName}\"..HEAD", repoRoot);
+            return int.TryParse(distanceText, out var distance) ? distance : null;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static (string baseTag, int distance, bool hasTag) GetFallbackFromCommitCount(string repoRoot)
