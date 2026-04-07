@@ -181,3 +181,11 @@ class when_computing_version_for_feature_branch_with_prerelease_tag_as_base : Wi
     It should_have_prerelease_number_equal_to_distance = () => Result.PreReleaseNumber.ShouldEqual("8");
     It should_have_correct_semver = () => Result.SemVer.ShouldEqual("2.0.0-alpha.8");
 }
+
+[Subject(typeof(VersionCalculator), "release branch head tagged with prerelease semver")]
+class when_computing_version_for_release_branch_at_exact_prerelease_tag : With_git_commit_info_builder
+{
+    Establish context = () => CommitInfo = BuildCommitInfo("release/2.0.0", "2.0.0-beta.12", distance: 0);
+    Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
+    It should_use_the_tagged_prerelease_version = () => Result.SemVer.ShouldEqual("2.0.0-beta.12");
+}

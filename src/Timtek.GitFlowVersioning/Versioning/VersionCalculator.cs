@@ -14,16 +14,23 @@ public static class VersionCalculator
         var branchType = BranchClassifier.Classify(commitInfo.BranchName);
         var baseVersion = ResolveBaseVersion(parsedBaseVersion, branchType, commitInfo.BranchName);
         var distance = commitInfo.CommitDistance;
+        var taggedPrerelease = ParseTaggedPrerelease(commitInfo.BaseVersionTag);
 
         return branchType switch
         {
-            BranchType.Main    => BuildMainVersion(baseVersion, distance, commitInfo),
+            BranchType.Main => BuildMainVersion(baseVersion, distance, commitInfo),
+            BranchType.Release when IsExactTaggedCommit(commitInfo) && taggedPrerelease is { } releaseTag
+                => BuildPrereleaseVersion(baseVersion, distance, releaseTag.label, commitInfo, releaseTag.number),
             BranchType.Release => BuildPrereleaseVersion(baseVersion, distance, "beta", commitInfo),
-            BranchType.Hotfix  => BuildPrereleaseVersion(baseVersion, distance, "beta", commitInfo),
+            BranchType.Hotfix when IsExactTaggedCommit(commitInfo) && taggedPrerelease is { } hotfixTag
+                => BuildPrereleaseVersion(baseVersion, distance, hotfixTag.label, commitInfo, hotfixTag.number),
+            BranchType.Hotfix => BuildPrereleaseVersion(baseVersion, distance, "beta", commitInfo),
             BranchType.Develop => BuildDevelopVersion(baseVersion, distance, commitInfo),
+            _ when IsExactTaggedCommit(commitInfo) && taggedPrerelease is { } otherTag
+                => BuildPrereleaseVersion(baseVersion, distance, otherTag.label, commitInfo, otherTag.number),
             _ when IsExactTaggedCommit(commitInfo)
-                               => BuildMainVersion(baseVersion, distance, commitInfo),
-            _                  => BuildPrereleaseVersion(baseVersion, distance, "alpha", commitInfo),
+                => BuildMainVersion(baseVersion, distance, commitInfo),
+            _ => BuildPrereleaseVersion(baseVersion, distance, "alpha", commitInfo),
         };
     }
 
@@ -67,13 +74,13 @@ public static class VersionCalculator
         };
     }
 
-    private static VersionInfo BuildPrereleaseVersion(Version baseVersion, int distance, string label, GitCommitInfo commitInfo)
+    private static VersionInfo BuildPrereleaseVersion(Version baseVersion, int distance, string label, GitCommitInfo commitInfo, string? preReleaseNumberOverride = null)
     {
         var major = baseVersion.Major.ToString();
         var minor = baseVersion.Minor.ToString();
         var patch = baseVersion.Build.ToString();
         var mmp = $"{major}.{minor}.{patch}";
-        var preReleaseNumber = distance.ToString();
+        var preReleaseNumber = preReleaseNumberOverride ?? distance.ToString();
         var preReleaseTag = $"{label}.{preReleaseNumber}";
         var preReleaseTagWithDash = $"-{preReleaseTag}";
         var semVer = $"{mmp}{preReleaseTagWithDash}";
@@ -145,6 +152,24 @@ public static class VersionCalculator
 
     private static bool IsExactTaggedCommit(GitCommitInfo commitInfo) =>
         commitInfo.HasTag && commitInfo.CommitDistance == 0;
+
+    private static (string label, string number)? ParseTaggedPrerelease(string tag)
+    {
+        if (string.IsNullOrWhiteSpace(tag))
+            return null;
+
+        var clean = tag.TrimStart('v', 'V');
+        var hyphenIndex = clean.IndexOf('-');
+        if (hyphenIndex <= 0 || hyphenIndex == clean.Length - 1)
+            return null;
+
+        var prereleasePart = clean.Substring(hyphenIndex + 1);
+        var parts = prereleasePart.Split('.');
+        if (parts.Length != 2 || string.IsNullOrWhiteSpace(parts[0]))
+            return null;
+
+        return int.TryParse(parts[1], out _) ? (parts[0], parts[1]) : null;
+    }
 
     private static Version ParseBaseVersion(string tag)
     {
