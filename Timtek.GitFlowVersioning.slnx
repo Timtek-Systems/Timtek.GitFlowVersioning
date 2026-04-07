@@ -10,6 +10,7 @@
     <File Path="docs/getting-started.md" />
     <File Path="docs/how-it-works.md" />
     <File Path="docs/index.md" />
+    <File Path="docs/Timtek.GitFlowVersion/GitFlowVersion Design Specification.md" />
     <File Path="docs/version-variables.md" />
   </Folder>
   <Folder Name="/scripts/">
