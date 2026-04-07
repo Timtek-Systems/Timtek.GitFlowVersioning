@@ -13,7 +13,7 @@
              Condition="'$(_GitFlowVersioningTaskAssembly)' != '' And Exists('$(_GitFlowVersioningTaskAssembly)')" />
 
   <Target Name="_ComputeGitFlowVersionForPack"
-          BeforeTargets="GenerateNuspec"
+          BeforeTargets="_GetProjectVersion;_GetProjectReferenceVersions;GenerateNuspec"
           Condition="'$(GitFlowVersioningEnabled)' == 'true' And '$(DesignTimeBuild)' != 'true' And '$(_GitFlowVersioningTaskAssembly)' != ''">
 
     <ComputeGitFlowVersionTask
