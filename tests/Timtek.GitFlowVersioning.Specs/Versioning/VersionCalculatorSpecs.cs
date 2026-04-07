@@ -148,3 +148,36 @@ class when_computing_version_for_hotfix_branch_with_detached_suffix : With_git_c
     It should_keep_beta_label = () => Result.PreReleaseLabel.ShouldEqual("beta");
     It should_produce_expected_semver = () => Result.SemVer.ShouldEqual("3.0.1-beta.19");
 }
+
+[Subject(typeof(VersionCalculator), "release branch with prerelease tag baseline")]
+class when_computing_version_for_release_branch_with_prerelease_tag_as_base : With_git_commit_info_builder
+{
+    Establish context = () => CommitInfo = BuildCommitInfo("release/2.0.0", "2.0.0-beta.12", distance: 5);
+    Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
+    It should_use_branch_version_as_base = () => Result.MajorMinorPatch.ShouldEqual("2.0.0");
+    It should_have_beta_prerelease_label = () => Result.PreReleaseLabel.ShouldEqual("beta");
+    It should_have_prerelease_number_equal_to_distance = () => Result.PreReleaseNumber.ShouldEqual("5");
+    It should_have_correct_semver = () => Result.SemVer.ShouldEqual("2.0.0-beta.5");
+}
+
+[Subject(typeof(VersionCalculator), "hotfix branch with prerelease tag baseline")]
+class when_computing_version_for_hotfix_branch_with_prerelease_tag_as_base : With_git_commit_info_builder
+{
+    Establish context = () => CommitInfo = BuildCommitInfo("hotfix/3.0.1", "3.0.1-beta.7", distance: 3);
+    Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
+    It should_use_hotfix_version_as_base = () => Result.MajorMinorPatch.ShouldEqual("3.0.1");
+    It should_have_beta_prerelease_label = () => Result.PreReleaseLabel.ShouldEqual("beta");
+    It should_have_prerelease_number_equal_to_distance = () => Result.PreReleaseNumber.ShouldEqual("3");
+    It should_have_correct_semver = () => Result.SemVer.ShouldEqual("3.0.1-beta.3");
+}
+
+[Subject(typeof(VersionCalculator), "feature branch with prerelease tag baseline")]
+class when_computing_version_for_feature_branch_with_prerelease_tag_as_base : With_git_commit_info_builder
+{
+    Establish context = () => CommitInfo = BuildCommitInfo("feature/cool-thing", "2.0.0-beta.4", distance: 8);
+    Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
+    It should_use_prerelease_tag_numeric_base = () => Result.MajorMinorPatch.ShouldEqual("2.0.0");
+    It should_have_alpha_prerelease_label = () => Result.PreReleaseLabel.ShouldEqual("alpha");
+    It should_have_prerelease_number_equal_to_distance = () => Result.PreReleaseNumber.ShouldEqual("8");
+    It should_have_correct_semver = () => Result.SemVer.ShouldEqual("2.0.0-alpha.8");
+}

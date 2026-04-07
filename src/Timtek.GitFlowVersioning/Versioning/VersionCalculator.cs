@@ -152,6 +152,13 @@ public static class VersionCalculator
             return FallbackVersion;
 
         var clean = tag.TrimStart('v', 'V');
+
+        // Strip any prerelease suffix (e.g. "-beta.12") before parsing so that
+        // tags like "2.0.0-beta.12" yield a base of 2.0.0 rather than falling back.
+        var hyphenIndex = clean.IndexOf('-');
+        if (hyphenIndex > 0)
+            clean = clean.Substring(0, hyphenIndex);
+
         try
         {
             var parsedVersion = Version.Parse(clean);
