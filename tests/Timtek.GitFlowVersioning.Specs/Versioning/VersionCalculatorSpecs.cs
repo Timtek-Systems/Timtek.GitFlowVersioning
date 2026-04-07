@@ -156,8 +156,8 @@ class when_computing_version_for_release_branch_with_prerelease_tag_as_base : Wi
     Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
     It should_use_branch_version_as_base = () => Result.MajorMinorPatch.ShouldEqual("2.0.0");
     It should_have_beta_prerelease_label = () => Result.PreReleaseLabel.ShouldEqual("beta");
-    It should_have_prerelease_number_equal_to_distance = () => Result.PreReleaseNumber.ShouldEqual("5");
-    It should_have_correct_semver = () => Result.SemVer.ShouldEqual("2.0.0-beta.5");
+    It should_continue_the_prerelease_number_from_the_tag = () => Result.PreReleaseNumber.ShouldEqual("17");
+    It should_have_correct_semver = () => Result.SemVer.ShouldEqual("2.0.0-beta.17");
 }
 
 [Subject(typeof(VersionCalculator), "hotfix branch with prerelease tag baseline")]
@@ -167,8 +167,8 @@ class when_computing_version_for_hotfix_branch_with_prerelease_tag_as_base : Wit
     Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
     It should_use_hotfix_version_as_base = () => Result.MajorMinorPatch.ShouldEqual("3.0.1");
     It should_have_beta_prerelease_label = () => Result.PreReleaseLabel.ShouldEqual("beta");
-    It should_have_prerelease_number_equal_to_distance = () => Result.PreReleaseNumber.ShouldEqual("3");
-    It should_have_correct_semver = () => Result.SemVer.ShouldEqual("3.0.1-beta.3");
+    It should_continue_the_prerelease_number_from_the_tag = () => Result.PreReleaseNumber.ShouldEqual("10");
+    It should_have_correct_semver = () => Result.SemVer.ShouldEqual("3.0.1-beta.10");
 }
 
 [Subject(typeof(VersionCalculator), "feature branch with prerelease tag baseline")]
@@ -188,4 +188,12 @@ class when_computing_version_for_release_branch_at_exact_prerelease_tag : With_g
     Establish context = () => CommitInfo = BuildCommitInfo("release/2.0.0", "2.0.0-beta.12", distance: 0);
     Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
     It should_use_the_tagged_prerelease_version = () => Result.SemVer.ShouldEqual("2.0.0-beta.12");
+}
+
+[Subject(typeof(VersionCalculator), "release branch one commit after prerelease tag")]
+class when_computing_version_for_release_branch_one_commit_after_prerelease_tag : With_git_commit_info_builder
+{
+    Establish context = () => CommitInfo = BuildCommitInfo("release/2.0.0", "2.0.0-beta.12", distance: 1);
+    Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
+    It should_increment_the_prerelease_number_from_the_tag = () => Result.SemVer.ShouldEqual("2.0.0-beta.13");
 }

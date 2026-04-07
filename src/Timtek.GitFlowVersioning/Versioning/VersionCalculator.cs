@@ -21,10 +21,10 @@ public static class VersionCalculator
             BranchType.Main => BuildMainVersion(baseVersion, distance, commitInfo),
             BranchType.Release when IsExactTaggedCommit(commitInfo) && taggedPrerelease is { } releaseTag
                 => BuildPrereleaseVersion(baseVersion, distance, releaseTag.label, commitInfo, releaseTag.number),
-            BranchType.Release => BuildPrereleaseVersion(baseVersion, distance, "beta", commitInfo),
+            BranchType.Release => BuildBranchPrereleaseVersion(baseVersion, distance, "beta", taggedPrerelease, commitInfo),
             BranchType.Hotfix when IsExactTaggedCommit(commitInfo) && taggedPrerelease is { } hotfixTag
                 => BuildPrereleaseVersion(baseVersion, distance, hotfixTag.label, commitInfo, hotfixTag.number),
-            BranchType.Hotfix => BuildPrereleaseVersion(baseVersion, distance, "beta", commitInfo),
+            BranchType.Hotfix => BuildBranchPrereleaseVersion(baseVersion, distance, "beta", taggedPrerelease, commitInfo),
             BranchType.Develop => BuildDevelopVersion(baseVersion, distance, commitInfo),
             _ when IsExactTaggedCommit(commitInfo) && taggedPrerelease is { } otherTag
                 => BuildPrereleaseVersion(baseVersion, distance, otherTag.label, commitInfo, otherTag.number),
@@ -72,6 +72,20 @@ public static class VersionCalculator
             AssemblySemVer = $"{major}.{minor}.0.0",
             AssemblySemFileVer = $"{major}.{minor}.{patchStr}.0"
         };
+    }
+
+    private static VersionInfo BuildBranchPrereleaseVersion(Version baseVersion, int distance, string label, (string label, string number)? taggedPrerelease, GitCommitInfo commitInfo)
+    {
+        var preReleaseNumber = ResolveBranchPrereleaseNumber(label, taggedPrerelease, distance);
+        return BuildPrereleaseVersion(baseVersion, distance, label, commitInfo, preReleaseNumber);
+    }
+
+    private static string ResolveBranchPrereleaseNumber(string label, (string label, string number)? taggedPrerelease, int distance)
+    {
+        if (taggedPrerelease is not { } parsedTag || !string.Equals(parsedTag.label, label, StringComparison.OrdinalIgnoreCase))
+            return distance.ToString();
+
+        return (int.Parse(parsedTag.number) + distance).ToString();
     }
 
     private static VersionInfo BuildPrereleaseVersion(Version baseVersion, int distance, string label, GitCommitInfo commitInfo, string? preReleaseNumberOverride = null)
