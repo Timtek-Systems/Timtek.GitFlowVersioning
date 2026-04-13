@@ -51,8 +51,8 @@ tag `1.2.0` and 5 commits since that tag, at commit `a1b2c3d4e5f6a1b2c3d4e5f6a1b
 | `BuildMetaData` | `_GFV_BuildMetaData` | `5` | Commit distance as build metadata |
 | `FullBuildMetaData` | `_GFV_FullBuildMetaData` | `5.Branch.develop.Sha.a1b2c3d...` | Full build metadata string |
 | `InformationalVersion` | `_GFV_InformationalVersion` | `1.3.0-alpha.5+5.Branch.develop.Sha.a1b2c3d...` | Complete informational version |
-| `AssemblySemVer` | `_GFV_AssemblySemVer` | `1.3.0.0` | Four-part assembly version |
-| `AssemblySemFileVer` | `_GFV_AssemblySemFileVer` | `1.3.0.0` | Four-part file version |
+| `AssemblySemVer` | `_GFV_AssemblySemVer` | `1.3.0.5` | Four-part assembly version using a weighted prerelease revision |
+| `AssemblySemFileVer` | `_GFV_AssemblySemFileVer` | `1.3.0.5` | Four-part file version using a weighted prerelease revision |
 
 ## Standard MSBuild Properties
 

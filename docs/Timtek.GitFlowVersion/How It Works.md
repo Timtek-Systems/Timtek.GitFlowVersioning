@@ -50,7 +50,7 @@ Base tag: 1.2.0    Distance: 3    →    Version: 1.2.3
 | Variable | Value |
 |---|---|
 | `SemVer` | `1.2.3` |
-| `AssemblySemVer` | `1.2.0.0` |
+| `AssemblySemVer` | `1.2.3.0` |
 | `AssemblySemFileVer` | `1.2.3.0` |
 | `InformationalVersion` | `1.2.3+3.Branch.main.Sha.abc123...` |
 
@@ -70,6 +70,8 @@ Base tag: 1.2.0    Distance: 12    →    Version: 1.3.0-alpha.12
 | `FullSemVer` | `1.3.0-alpha.12+12` |
 | `PreReleaseLabel` | `alpha` |
 | `PreReleaseNumber` | `12` |
+| `AssemblySemVer` | `1.3.0.12` |
+| `AssemblySemFileVer` | `1.3.0.12` |
 
 ### Release and Hotfix Branches
 
@@ -88,6 +90,13 @@ is used as a fallback.
 Branch: release/1.3.0    Distance from develop merge-base: 4    →    Version: 1.3.0-beta.4
 Branch: hotfix/1.2.4     Distance from main merge-base: 1        →    Version: 1.2.4-beta.1
 ```
+
+For assembly and file versions, prerelease builds use a weighted fourth component:
+
+- `main` / `master`: branch weight `55000` (stable builds still emit `Major.Minor.Patch.0`)
+- `develop`: `Major.Minor.Patch.(0 + PreReleaseNumber)`
+- `release/*`, `hotfix/*`, and other prerelease branches: `Major.Minor.Patch.(30000 + PreReleaseNumber)`
+- stable builds: `Major.Minor.Patch.0`
 
 ### Feature and Other Branches
 

@@ -30,8 +30,8 @@ You can verify that versioning is active by checking the build output:
 Timtek.GitFlowVersioning:
   FullSemVer:           1.2.3-alpha.5+5
   SemVer:               1.2.3-alpha.5
-  AssemblySemVer:       1.2.0.0
-  AssemblySemFileVer:   1.2.3.0
+  AssemblySemVer:       1.2.3.5
+  AssemblySemFileVer:   1.2.3.5
   InformationalVersion: 1.2.3-alpha.5+5.Branch.develop.Sha.a1b2c3d...
   BranchName:           develop
   Sha:                  a1b2c3d4e5f6...

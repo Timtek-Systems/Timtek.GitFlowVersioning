@@ -18,12 +18,12 @@ public static class VersionCalculator
         return branchType switch
         {
             BranchType.Main    => BuildMainVersion(baseVersion, distance, commitInfo),
-            BranchType.Release => BuildPrereleaseVersion(baseVersion, distance, "beta", commitInfo),
-            BranchType.Hotfix  => BuildPrereleaseVersion(baseVersion, distance, "beta", commitInfo),
+            BranchType.Release => BuildPrereleaseVersion(baseVersion, distance, "beta", branchType, commitInfo),
+            BranchType.Hotfix  => BuildPrereleaseVersion(baseVersion, distance, "beta", branchType, commitInfo),
             BranchType.Develop => BuildDevelopVersion(baseVersion, distance, commitInfo),
             _ when IsExactTaggedCommit(commitInfo)
                                => BuildMainVersion(baseVersion, distance, commitInfo),
-            _                  => BuildPrereleaseVersion(baseVersion, distance, "alpha", commitInfo),
+            _                  => BuildPrereleaseVersion(baseVersion, distance, "alpha", branchType, commitInfo),
         };
     }
 
@@ -62,18 +62,19 @@ public static class VersionCalculator
             BuildMetaData = buildMetaData,
             FullBuildMetaData = fullBuildMetaData,
             InformationalVersion = informationalVersion,
-            AssemblySemVer = $"{major}.{minor}.0.0",
-            AssemblySemFileVer = $"{major}.{minor}.{patchStr}.0"
+            AssemblySemVer = BuildAssemblyVersion(major, minor, patchStr, 0),
+            AssemblySemFileVer = BuildAssemblyVersion(major, minor, patchStr, 0)
         };
     }
 
-    private static VersionInfo BuildPrereleaseVersion(Version baseVersion, int distance, string label, GitCommitInfo commitInfo)
+    private static VersionInfo BuildPrereleaseVersion(Version baseVersion, int distance, string label, BranchType branchType, GitCommitInfo commitInfo)
     {
         var major = baseVersion.Major.ToString();
         var minor = baseVersion.Minor.ToString();
         var patch = baseVersion.Build.ToString();
         var mmp = $"{major}.{minor}.{patch}";
         var preReleaseNumber = distance.ToString();
+        var weightedPreReleaseNumber = GetWeightedPreReleaseNumber(branchType, distance);
         var preReleaseTag = $"{label}.{preReleaseNumber}";
         var preReleaseTagWithDash = $"-{preReleaseTag}";
         var semVer = $"{mmp}{preReleaseTagWithDash}";
@@ -106,16 +107,22 @@ public static class VersionCalculator
             BuildMetaData = buildMetaData,
             FullBuildMetaData = fullBuildMetaData,
             InformationalVersion = informationalVersion,
-            AssemblySemVer = $"{major}.{minor}.0.0",
-            AssemblySemFileVer = $"{major}.{minor}.{patch}.0"
+            AssemblySemVer = BuildAssemblyVersion(major, minor, patch, weightedPreReleaseNumber),
+            AssemblySemFileVer = BuildAssemblyVersion(major, minor, patch, weightedPreReleaseNumber)
         };
     }
 
     private static VersionInfo BuildDevelopVersion(Version baseVersion, int distance, GitCommitInfo commitInfo)
     {
         var developBase = new Version(baseVersion.Major, baseVersion.Minor + 1, 0);
-        return BuildPrereleaseVersion(developBase, distance, "alpha", commitInfo);
+        return BuildPrereleaseVersion(developBase, distance, "alpha", BranchType.Develop, commitInfo);
     }
+
+    private static string BuildAssemblyVersion(string major, string minor, string patch, int revision) =>
+        $"{major}.{minor}.{patch}.{revision}";
+
+    private static int GetWeightedPreReleaseNumber(BranchType branchType, int preReleaseNumber) =>
+        PreReleaseWeightCalculator.GetWeight(branchType) + preReleaseNumber;
 
     private static string TruncateSha(string sha) =>
         sha.Length >= 7 ? sha.Substring(0, 7) : sha;

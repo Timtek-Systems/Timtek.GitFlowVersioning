@@ -106,8 +106,8 @@ The default command prints a JSON object containing every computed version varia
   "BuildMetaData": "12",
   "FullBuildMetaData": "12.Branch.develop.Sha.a1b2c3d4e5f6...",
   "InformationalVersion": "1.3.0-alpha.12+12.Branch.develop.Sha.a1b2c3d4e5f6...",
-  "AssemblySemVer": "1.3.0.0",
-  "AssemblySemFileVer": "1.3.0.0"
+  "AssemblySemVer": "1.3.0.12",
+  "AssemblySemFileVer": "1.3.0.12"
 }
 ```
 

@@ -50,13 +50,28 @@ It is important that code is kept simple and easy to read and understand. The fo
 
 # Testing
 
-- Generate unit specs for all new code, using the MSpec framework.
-- Ideally, work test-first, using the red-green-refactor cycle.
+Test-Driven Development (TDD) is mandatory for all code changes. For every bug fix, behavior change or new feature, you must:
+
+  1. add or update a spec that fails for the current code,
+  2. run the relevant tests and observe the failure,
+  3. only then change production code,
+  4. rerun tests until green.
+
+If a failing spec cannot be written first, stop and explain why before changing production code.
+Do not modify production code before a failing spec exists, unless the user explicitly waives TDD for that task.
+
+When generating unit tests / specifications, follow these guidelines:
+
+- Use the MSpec framework and BDD style
 - Aim for minimum 90% coverage, but recognise that full coverage is not always achievable or desirable.
 - Spec class names should fully describe the test context. The "when_*" class name should fully describe the test context and not rely on the file name for context. For example, a spec named `when_mid_is_valid` should be renamed to a more descriptive name like `when_updating_a_gen2_device_in_production_mode_without_clearing_counters_and_MID_is_valid` to provide full context in the test runner display.
-- Passing tests are contracts. When adding new code, if a previously-passing spec breaks, this may indicate a regression or unintended side effect. Such breakages should be flagged for review and discussion before changing any code or tests.
-- MSpec delegates (Establish, Because, It, Cleanup) must be synchronous. All delegates must execute synchronously because MSpec does not support async delegates. **Establish should be a single expression that builds the context. Because is where the unit under test gets exercised. Additional setup logic (like copying directories) belongs in Because, not Establish. Each It assertion should also be a single expression.**
-- Use a Context-Builder pattern, where each test class has a Context object containing the test data, results, services, etc. and a Builder object used to build the context for the test. The Establish clause should be a single statement where possible, similar to: `Establish context = () => Context = Builder.WithSomeScenario().Build();`. For efficiency, tests that share a common context should inherit from a base class named `With_{context_name}` that provides common setup and utilities and that's where the Context-Builder pattern should be established.
+- Passing tests are contracts. When adding new code, if a previously-passing spec breaks, this may indicate a regression or unintended side effect. Such breakages should be flagged for review and discussion before proceeding.
+- MSpec delegates (Establish, Because, It, Cleanup) must be synchronous. All delegates must execute synchronously because MSpec does not support async delegates. 
+- `Establish` should be a single expression-bodied property that builds the context and represets the Given/Arrange phase of the test. For nontrivial setups, use the Context-Builder pattern described below to keep the Establish clause concise and focused on building the context for the test.
+- `Because` represents the When/Act phase of the test. Avoid multiple statements or complex logic in the Because clause; it should do the minimum necessary to exercise the UUT.
+- `It` represents the Then/Assert phase of the test. Each `It` clause should contain a single assertion and be named to clearly indicate what is being asserted.
+- When `Establish` cannot be representad as a single-line expression-bodied property, use the Context-Builder pattern, where each test class has a Context object containing the test data, results, services, etc. and a Builder object used to build the context for the test. The Establish clause should then reduce to a single statement similar to: `Establish context = () => Context = Builder.WithSomeScenario().WithSomeData().Build();`. For efficiency, tests that share a common context should inherit from a base class named `with_{context_name}` that provides common setup and utilities and that's where the Context-Builder pattern should be established.
+- Don't add extra empty lines in specs, this just adds noise. Test readability is enhanced by keeping related code together without unnecessary spacing. Note: line breaks in fluent expressions are acceptable.
 
 # Internal Conventions
 

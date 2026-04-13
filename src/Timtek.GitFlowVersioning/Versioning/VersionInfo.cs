@@ -57,10 +57,10 @@ public sealed class VersionInfo
     /// <summary>Gets or sets the informational version (SemVer+FullBuildMetaData).</summary>
     public string InformationalVersion { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the assembly semantic version ("M.N.0.0").</summary>
+    /// <summary>Gets or sets the assembly semantic version ("M.N.P.0" for stable builds, weighted prerelease revision otherwise).</summary>
     public string AssemblySemVer { get; set; } = "0.0.0.0";
 
-    /// <summary>Gets or sets the assembly file version ("M.N.P.0").</summary>
+    /// <summary>Gets or sets the assembly file version ("M.N.P.0" for stable builds, weighted prerelease revision otherwise).</summary>
     public string AssemblySemFileVer { get; set; } = "0.0.0.0";
 
     /// <summary>Returns the <see cref="SemVer"/> value.</summary>

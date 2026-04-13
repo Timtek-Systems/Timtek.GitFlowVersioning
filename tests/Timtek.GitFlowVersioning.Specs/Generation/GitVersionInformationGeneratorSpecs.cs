@@ -30,7 +30,7 @@ class when_generating_git_version_information_for_a_stable_release
         BuildMetaData = "0",
         FullBuildMetaData = "0.Branch.main.Sha.abcdef1234567890abcdef1234567890abcdef12",
         InformationalVersion = "1.2.3+0.Branch.main.Sha.abcdef1234567890abcdef1234567890abcdef12",
-        AssemblySemVer = "1.2.0.0",
+        AssemblySemVer = "1.2.3.0",
         AssemblySemFileVer = "1.2.3.0"
     };
 
@@ -43,7 +43,7 @@ class when_generating_git_version_information_for_a_stable_release
     It should_contain_patch_constant = () => result.ShouldContain("public const string Patch = \"3\";");
     It should_contain_semver_constant = () => result.ShouldContain("public const string SemVer = \"1.2.3\";");
     It should_contain_informational_version_constant = () => result.ShouldContain("public const string InformationalVersion = \"1.2.3+0.Branch.main.Sha.abcdef1234567890abcdef1234567890abcdef12\";");
-    It should_contain_assembly_sem_ver_constant = () => result.ShouldContain("public const string AssemblySemVer = \"1.2.0.0\";");
+    It should_contain_assembly_sem_ver_constant = () => result.ShouldContain("public const string AssemblySemVer = \"1.2.3.0\";");
 }
 
 [Subject(typeof(GitVersionInformationGenerator))]
@@ -72,8 +72,8 @@ class when_generating_git_version_information_for_alpha_prerelease
         BuildMetaData = "7",
         FullBuildMetaData = "7.Branch.develop.Sha.abcdef1234567890abcdef1234567890abcdef12",
         InformationalVersion = "1.3.0-alpha.7+7.Branch.develop.Sha.abcdef1234567890abcdef1234567890abcdef12",
-        AssemblySemVer = "1.3.0.0",
-        AssemblySemFileVer = "1.3.0.0"
+        AssemblySemVer = "1.3.0.7",
+        AssemblySemFileVer = "1.3.0.7"
     };
 
     Because of = () => result = GitVersionInformationGenerator.Generate(versionInfo);
@@ -109,8 +109,8 @@ class when_generating_git_version_information_with_branch_name_containing_specia
         BuildMetaData = "1",
         FullBuildMetaData = "1.Branch.feature-test-branch.Sha.abc123",
         InformationalVersion = "1.0.0-alpha.1+1.Branch.feature-test\\branch.Sha.abc123",
-        AssemblySemVer = "1.0.0.0",
-        AssemblySemFileVer = "1.0.0.0"
+        AssemblySemVer = "1.0.0.30001",
+        AssemblySemFileVer = "1.0.0.30001"
     };
 
     Because of = () => result = GitVersionInformationGenerator.Generate(versionInfo);

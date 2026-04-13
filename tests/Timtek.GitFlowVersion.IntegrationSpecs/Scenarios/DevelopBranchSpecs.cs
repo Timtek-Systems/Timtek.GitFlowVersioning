@@ -18,6 +18,8 @@ class when_develop_branch_is_ahead_of_tag_on_main : With_end_to_end_version_comp
     It should_have_alpha_label = () => Context.Result.PreReleaseLabel.ShouldEqual("alpha");
     It should_use_distance_as_prerelease_number = () => Context.Result.PreReleaseNumber.ShouldEqual("7");
     It should_produce_correct_semver = () => Context.Result.SemVer.ShouldEqual("1.3.0-alpha.7");
+    It should_produce_weighted_assembly_sem_ver = () => Context.Result.AssemblySemVer.ShouldEqual("1.3.0.7");
+    It should_produce_weighted_assembly_file_ver = () => Context.Result.AssemblySemFileVer.ShouldEqual("1.3.0.7");
 }
 
 [Subject("Develop branch integration")]

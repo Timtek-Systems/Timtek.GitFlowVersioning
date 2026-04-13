@@ -29,7 +29,7 @@ class when_computing_version_for_main_branch_at_exact_tag : With_git_commit_info
     It should_have_correct_patch = () => Result.Patch.ShouldEqual("3");
     It should_have_empty_prerelease_label = () => Result.PreReleaseLabel.ShouldBeEmpty();
     It should_have_semver_without_prerelease = () => Result.SemVer.ShouldEqual("1.2.3");
-    It should_have_assembly_sem_ver = () => Result.AssemblySemVer.ShouldEqual("1.2.0.0");
+    It should_have_assembly_sem_ver = () => Result.AssemblySemVer.ShouldEqual("1.2.3.0");
     It should_have_assembly_file_ver = () => Result.AssemblySemFileVer.ShouldEqual("1.2.3.0");
 }
 
@@ -53,6 +53,8 @@ class when_computing_version_for_develop_branch : With_git_commit_info_builder
     It should_have_alpha_prerelease_label = () => Result.PreReleaseLabel.ShouldEqual("alpha");
     It should_have_prerelease_number_equal_to_distance = () => Result.PreReleaseNumber.ShouldEqual("7");
     It should_have_correct_semver = () => Result.SemVer.ShouldEqual("1.3.0-alpha.7");
+    It should_have_weighted_assembly_sem_ver = () => Result.AssemblySemVer.ShouldEqual("1.3.0.7");
+    It should_have_weighted_assembly_file_ver = () => Result.AssemblySemFileVer.ShouldEqual("1.3.0.7");
 }
 
 [Subject(typeof(VersionCalculator), "release branch")]
@@ -64,6 +66,8 @@ class when_computing_version_for_release_branch : With_git_commit_info_builder
     It should_have_beta_prerelease_label = () => Result.PreReleaseLabel.ShouldEqual("beta");
     It should_have_prerelease_number_equal_to_distance = () => Result.PreReleaseNumber.ShouldEqual("3");
     It should_have_correct_semver = () => Result.SemVer.ShouldEqual("1.3.0-beta.3");
+    It should_have_weighted_assembly_sem_ver = () => Result.AssemblySemVer.ShouldEqual("1.3.0.30003");
+    It should_have_weighted_assembly_file_ver = () => Result.AssemblySemFileVer.ShouldEqual("1.3.0.30003");
 }
 
 [Subject(typeof(VersionCalculator), "release branch with non-version suffix")]
@@ -83,6 +87,8 @@ class when_computing_version_for_hotfix_branch : With_git_commit_info_builder
     It should_have_beta_prerelease_label = () => Result.PreReleaseLabel.ShouldEqual("beta");
     It should_have_prerelease_number_2 = () => Result.PreReleaseNumber.ShouldEqual("2");
     It should_have_correct_semver = () => Result.SemVer.ShouldEqual("1.2.3-beta.2");
+    It should_have_weighted_assembly_sem_ver = () => Result.AssemblySemVer.ShouldEqual("1.2.3.30002");
+    It should_have_weighted_assembly_file_ver = () => Result.AssemblySemFileVer.ShouldEqual("1.2.3.30002");
 }
 
 [Subject(typeof(VersionCalculator), "feature branch")]
@@ -93,6 +99,8 @@ class when_computing_version_for_feature_branch : With_git_commit_info_builder
     It should_have_alpha_prerelease_label = () => Result.PreReleaseLabel.ShouldEqual("alpha");
     It should_have_prerelease_number_10 = () => Result.PreReleaseNumber.ShouldEqual("10");
     It should_have_correct_semver = () => Result.SemVer.ShouldEqual("1.2.3-alpha.10");
+    It should_have_weighted_assembly_sem_ver = () => Result.AssemblySemVer.ShouldEqual("1.2.3.30010");
+    It should_have_weighted_assembly_file_ver = () => Result.AssemblySemFileVer.ShouldEqual("1.2.3.30010");
 }
 
 [Subject(typeof(VersionCalculator), "escaped branch name")]

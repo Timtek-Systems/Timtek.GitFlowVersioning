@@ -179,9 +179,11 @@ At minimum, compute:
 - `PreReleaseNumber`, `PreReleaseTag`, `PreReleaseTagWithDash` [2](https://gitversion.net/docs/reference/variables)
 - `BuildMetaData`, `FullBuildMetaData` [2](https://gitversion.net/docs/reference/variables)
 - `InformationalVersion` (used for `AssemblyInformationalVersion`) [2](https://gitversion.net/docs/reference/variables)
-- `AssemblySemVer` and `AssemblySemFileVer` with GitVersion-like defaults:
-  - `AssemblySemVer` defaults to `Major.Minor.0.0` [2](https://gitversion.net/docs/reference/variables)
-  - `AssemblySemFileVer` defaults to `Major.Minor.Patch.0` [2](https://gitversion.net/docs/reference/variables)
+- `AssemblySemVer` and `AssemblySemFileVer` with weighted prerelease defaults:
+  - `main` / `master` has branch weight `55000`, but stable builds still use `Major.Minor.Patch.0`
+  - Stable builds use `Major.Minor.Patch.0`
+  - `develop` uses `Major.Minor.Patch.(0 + PreReleaseNumber)`
+  - `release/*`, `hotfix/*`, and other prerelease branches use `Major.Minor.Patch.(30000 + PreReleaseNumber)`
 
 > Note: GitVersion’s variable documentation provides these defaults and intended usage. [2](https://gitversion.net/docs/reference/variables)
 
@@ -432,8 +434,8 @@ internal static class GitVersionInformation
     public const string BuildMetaData = "99";
     public const string FullBuildMetaData = "99.Branch.feature/foo.Sha.0123456789abcdef...";
     public const string InformationalVersion = "1.2.3-alpha.42+99.Branch.feature/foo.Sha.012345...";
-    public const string AssemblySemVer = "1.2.0.0";
-    public const string AssemblySemFileVer = "1.2.3.0";
+    public const string AssemblySemVer = "1.2.3.30042";
+    public const string AssemblySemFileVer = "1.2.3.30042";
 }
 
 
