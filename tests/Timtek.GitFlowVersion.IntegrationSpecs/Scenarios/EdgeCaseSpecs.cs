@@ -80,7 +80,7 @@ class when_a_non_semver_tag_is_nearer_than_a_valid_release_tag : With_end_to_end
         .WithInitialCommit()
         .WithTag("1.0.0")
         .WithCommits(2)
-        .WithTag("v1.0.2-rc.1")
+        .WithTag("v1.0.5-rc.1")
         .Build();
 
     It should_ignore_the_nearer_non_semver_tag = () => Context.Result.PreReleaseLabel.ShouldBeEmpty();

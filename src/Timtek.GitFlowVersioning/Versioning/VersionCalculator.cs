@@ -15,6 +15,13 @@ public static class VersionCalculator
         var baseVersion = ResolveBaseVersion(parsedBaseVersion, branchType, commitInfo.BranchName);
         var distance = commitInfo.CommitDistance;
 
+        if (branchType == BranchType.Release)
+        {
+            var overrideVersion = TryBuildReleaseTagOverrideVersion(commitInfo, baseVersion);
+            if (overrideVersion is not null)
+                return overrideVersion;
+        }
+
         return branchType switch
         {
             BranchType.Main    => BuildMainVersion(baseVersion, distance, commitInfo),
@@ -109,6 +116,75 @@ public static class VersionCalculator
             InformationalVersion = informationalVersion,
             AssemblySemVer = BuildAssemblyVersion(major, minor, patch, weightedPreReleaseNumber),
             AssemblySemFileVer = BuildAssemblyVersion(major, minor, patch, weightedPreReleaseNumber)
+        };
+    }
+
+    /// <summary>
+    /// Builds an override <see cref="VersionInfo"/> when the release branch's current commit carries an exact
+    /// prerelease tag (e.g. "6.3.0-rc.1") whose Major.Minor.Patch matches the branch-resolved <paramref name="baseVersion"/>.
+    /// Returns <see langword="null"/> when no override applies, in which case normal branch logic should be used.
+    /// </summary>
+    private static VersionInfo? TryBuildReleaseTagOverrideVersion(GitCommitInfo commitInfo, Version baseVersion)
+    {
+        if (string.IsNullOrEmpty(commitInfo.ExactPrereleaseTag))
+            return null;
+
+        var dashIndex = commitInfo.ExactPrereleaseTag.IndexOf('-');
+        if (dashIndex < 0)
+            return null;
+
+        var tagMajorMinorPatch = commitInfo.ExactPrereleaseTag.Substring(0, dashIndex);
+        var branchMajorMinorPatch = $"{baseVersion.Major}.{baseVersion.Minor}.{baseVersion.Build}";
+        if (tagMajorMinorPatch != branchMajorMinorPatch)
+            return null;
+
+        var prereleaseComponent = commitInfo.ExactPrereleaseTag.Substring(dashIndex + 1);
+        return BuildReleaseTagOverrideVersion(tagMajorMinorPatch, prereleaseComponent, commitInfo);
+    }
+
+    private static VersionInfo BuildReleaseTagOverrideVersion(string majorMinorPatch, string prereleaseComponent, GitCommitInfo commitInfo)
+    {
+        var parts = majorMinorPatch.Split('.');
+        var major = parts[0];
+        var minor = parts[1];
+        var patch = parts[2];
+        var dotIndex = prereleaseComponent.IndexOf('.');
+        var label = dotIndex >= 0 ? prereleaseComponent.Substring(0, dotIndex) : prereleaseComponent;
+        var number = dotIndex >= 0 ? prereleaseComponent.Substring(dotIndex + 1) : string.Empty;
+        var preReleaseTagWithDash = $"-{prereleaseComponent}";
+        var semVer = $"{majorMinorPatch}{preReleaseTagWithDash}";
+        var sha = commitInfo.Sha;
+        var shortSha = TruncateSha(sha);
+        var branchName = commitInfo.BranchName;
+        var escapedBranchName = EscapeBranchName(branchName);
+        const string buildMetaData = "0";
+        var fullBuildMetaData = $"{buildMetaData}.Branch.{branchName}.Sha.{sha}";
+        var fullSemVer = $"{semVer}+{buildMetaData}";
+        var informationalVersion = $"{semVer}+{fullBuildMetaData}";
+        var weightedRevision = PreReleaseWeightCalculator.GetWeight(BranchType.Release) + (int.TryParse(number, out var parsedNumber) ? parsedNumber : 0);
+
+        return new VersionInfo
+        {
+            Major = major,
+            Minor = minor,
+            Patch = patch,
+            MajorMinorPatch = majorMinorPatch,
+            PreReleaseLabel = label,
+            PreReleaseLabelWithDash = $"-{label}",
+            PreReleaseNumber = number,
+            PreReleaseTag = prereleaseComponent,
+            PreReleaseTagWithDash = preReleaseTagWithDash,
+            SemVer = semVer,
+            FullSemVer = fullSemVer,
+            BranchName = branchName,
+            EscapedBranchName = escapedBranchName,
+            Sha = sha,
+            ShortSha = shortSha,
+            BuildMetaData = buildMetaData,
+            FullBuildMetaData = fullBuildMetaData,
+            InformationalVersion = informationalVersion,
+            AssemblySemVer = BuildAssemblyVersion(major, minor, patch, weightedRevision),
+            AssemblySemFileVer = BuildAssemblyVersion(major, minor, patch, weightedRevision)
         };
     }
 

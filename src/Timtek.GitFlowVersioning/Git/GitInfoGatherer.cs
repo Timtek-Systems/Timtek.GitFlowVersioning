@@ -21,6 +21,7 @@ public static class GitInfoGatherer
 
         var (baseTag, distanceFromTag, hasTag) = GetVersionFromDescribe(repoRoot);
         var distance = GetBranchAwareDistance(repoRoot, branchName, distanceFromTag);
+        var exactPrereleaseTag = GetExactPrereleaseTagAtHead(repoRoot);
 
         return new Versioning.GitCommitInfo
         {
@@ -28,7 +29,8 @@ public static class GitInfoGatherer
             BranchName = branchName,
             BaseVersionTag = baseTag,
             CommitDistance = distance,
-            HasTag = hasTag
+            HasTag = hasTag,
+            ExactPrereleaseTag = exactPrereleaseTag
         };
     }
 
@@ -144,6 +146,33 @@ public static class GitInfoGatherer
     }
 
     private static bool IsSemanticVersionTag(string tagName) => SemanticVersionTagPattern.IsMatch(tagName);
+
+    // Independent of the base-tag detection above: this pattern requires a prerelease label
+    // (e.g. "6.3.0-rc.1") and is used solely for the release-branch tag override mechanism in
+    // VersionCalculator. It must not affect base-version tag resolution elsewhere.
+    private static readonly Regex ExactPrereleaseTagPattern = new(@"^\d+\.\d+\.\d+-[0-9A-Za-z][0-9A-Za-z.-]*$", RegexOptions.CultureInvariant);
+
+    private static string GetExactPrereleaseTagAtHead(string repoRoot)
+    {
+        try
+        {
+            var tagsAtHead = GitCommandRunner.RunCommand("tag --points-at HEAD", repoRoot)
+                .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var tagName in tagsAtHead)
+            {
+                var candidate = tagName.Trim().TrimStart('v', 'V');
+                if (ExactPrereleaseTagPattern.IsMatch(candidate))
+                    return candidate;
+            }
+
+            return string.Empty;
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
 
     private static (string baseTag, int distance, bool hasTag)? TryGetNearestSemanticVersionTag(string repoRoot)
     {

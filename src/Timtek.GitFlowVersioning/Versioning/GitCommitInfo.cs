@@ -17,4 +17,11 @@ public sealed class GitCommitInfo
 
     /// <summary>Gets or sets a value indicating whether any version tag was found.</summary>
     public bool HasTag { get; set; }
+
+    /// <summary>
+    /// Gets or sets a valid prerelease-labeled SemVer tag (e.g. "6.3.0-rc.1") that points exactly at the
+    /// current commit, or empty if none exists. This is independent of <see cref="BaseVersionTag"/> and is
+    /// used only to support the release-branch tag override mechanism in <c>VersionCalculator</c>.
+    /// </summary>
+    public string ExactPrereleaseTag { get; set; } = string.Empty;
 }

@@ -8,14 +8,15 @@ class With_git_commit_info_builder
     protected static GitCommitInfo CommitInfo = null!;
     protected static VersionInfo Result = null!;
 
-    protected static GitCommitInfo BuildCommitInfo(string branchName, string baseTag = "1.2.3", int distance = 0)
+    protected static GitCommitInfo BuildCommitInfo(string branchName, string baseTag = "1.2.3", int distance = 0, string exactPrereleaseTag = "")
         => new GitCommitInfo
         {
             Sha = "abcdef1234567890abcdef1234567890abcdef12",
             BranchName = branchName,
             BaseVersionTag = baseTag,
             CommitDistance = distance,
-            HasTag = true
+            HasTag = true,
+            ExactPrereleaseTag = exactPrereleaseTag
         };
 }
 
@@ -155,4 +156,42 @@ class when_computing_version_for_hotfix_branch_with_detached_suffix : With_git_c
     It should_use_hotfix_version_base = () => Result.MajorMinorPatch.ShouldEqual("3.0.1");
     It should_keep_beta_label = () => Result.PreReleaseLabel.ShouldEqual("beta");
     It should_produce_expected_semver = () => Result.SemVer.ShouldEqual("3.0.1-beta.19");
+}
+
+[Subject(typeof(VersionCalculator), "release branch tag override")]
+class when_release_branch_has_a_matching_exact_prerelease_tag : With_git_commit_info_builder
+{
+    Establish context = () => CommitInfo = BuildCommitInfo("release/6.3.0", "6.2.0", distance: 3, exactPrereleaseTag: "6.3.0-rc.1");
+    Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
+    It should_use_the_tag_as_major_minor_patch = () => Result.MajorMinorPatch.ShouldEqual("6.3.0");
+    It should_use_the_tag_prerelease_label = () => Result.PreReleaseLabel.ShouldEqual("rc");
+    It should_use_the_tag_prerelease_number = () => Result.PreReleaseNumber.ShouldEqual("1");
+    It should_use_the_tag_verbatim_as_semver = () => Result.SemVer.ShouldEqual("6.3.0-rc.1");
+    It should_have_a_build_metadata_of_zero = () => Result.FullSemVer.ShouldEqual("6.3.0-rc.1+0");
+}
+
+[Subject(typeof(VersionCalculator), "release branch tag override")]
+class when_release_branch_has_a_mismatched_exact_prerelease_tag : With_git_commit_info_builder
+{
+    Establish context = () => CommitInfo = BuildCommitInfo("release/6.3.0", "6.2.0", distance: 3, exactPrereleaseTag: "5.0.0-rc.1");
+    Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
+    It should_ignore_the_mismatched_tag_and_use_branch_version = () => Result.MajorMinorPatch.ShouldEqual("6.3.0");
+    It should_fall_back_to_beta_label = () => Result.PreReleaseLabel.ShouldEqual("beta");
+    It should_produce_correct_semver = () => Result.SemVer.ShouldEqual("6.3.0-beta.3");
+}
+
+[Subject(typeof(VersionCalculator), "release branch tag override")]
+class when_release_branch_has_no_exact_prerelease_tag : With_git_commit_info_builder
+{
+    Establish context = () => CommitInfo = BuildCommitInfo("release/6.3.0", "6.2.0", distance: 3);
+    Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
+    It should_use_normal_beta_logic = () => Result.SemVer.ShouldEqual("6.3.0-beta.3");
+}
+
+[Subject(typeof(VersionCalculator), "release branch tag override")]
+class when_develop_branch_has_a_matching_exact_prerelease_tag : With_git_commit_info_builder
+{
+    Establish context = () => CommitInfo = BuildCommitInfo("develop", "1.2.0", distance: 4, exactPrereleaseTag: "1.3.0-rc.1");
+    Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
+    It should_ignore_the_tag_override_on_non_release_branches = () => Result.SemVer.ShouldEqual("1.3.0-alpha.4");
 }
