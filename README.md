@@ -177,3 +177,66 @@ Full documentation lives in the Obsidian vault at [`docs/Timtek.GitFlowVersion/`
 | [Version Variables](docs/Timtek.GitFlowVersion/Version%20Variables.md) | Complete variable reference and MSBuild property mapping |
 | [CI Integration](docs/Timtek.GitFlowVersion/CI%20Integration.md) | GitHub Actions and TeamCity setup |
 | [FAQ](docs/Timtek.GitFlowVersion/FAQ.md) | Common questions and troubleshooting |
+
+## Release Notes
+
+### 3.1.0
+
+- **Release branch tag override**: tagging a commit on a `release/*` branch with a full prerelease SemVer (e.g. `6.3.0-rc.1`) now uses that tag verbatim as the version for that exact commit — handy for promoting a `-beta` build to a `-rc` build for testers. The override applies only to that tagged commit; the next commit reverts automatically to normal `beta.N` numbering.
+- **Weighted prerelease assembly versions**: `AssemblySemVer`/`AssemblySemFileVer` now derive their revision component from a branch-type weight (`develop` = 0, `release`/`hotfix`/other = 30000, stable `main` = 55000) plus the pre-release number, so builds from different branch types can never collide on the same assembly version.
+- **Fix**: on `release/*` and `hotfix/*` branches, the branch-aware commit distance now only uses the merge-base distance (from `develop`/`main`) when it is *smaller* than the distance to the nearest tag, so a tag placed directly on the branch always takes precedence.
+- Added a NuGet pack dependency validation script (`Validate-PackProjectReferenceVersions.ps1`) to check dependency versions in packed `.nuspec` files during CI.
+
+### 3.0.3
+
+- Improved SemVer tag matching so it more accurately targets version tags and is no longer distracted by CI `build-*` tags.
+
+### 3.0.2
+
+- Fixed several build system issues, including writing the CI build number to the MSBuild logger instead of the console, and corrected versioning import paths and file naming for consistency.
+
+### 3.0.1
+
+- Fixed TeamCity hotfix branch version parsing.
+- Removed an experimental integration test that didn't work out.
+
+### 1.2.0
+
+- Excluded integration tests from CI builds (they require a `git` executable and a writable filesystem, so they now run locally only).
+- Updated the GitHub Actions CI build to the latest Node.js versions.
+- Corrected documentation to match actual behaviour.
+
+### 1.0.5
+
+- **Branch-aware versioning**: release/hotfix branches now compute commit distance using the merge-base with `develop`/`main` as appropriate, and use the branch name's version suffix as the base version when valid; exact tagged commits are treated as stable releases.
+- Renamed the project from `GitFlowVersioning` to `GitFlowVersion`.
+- Added the `Timtek.GitFlowVersion.IntegrationSpecs` project for end-to-end testing against real temporary Git repositories, plus a CLI snapshot capture feature (`dotnet gitflowversion snapshot`) that generates replayable C# MSpec test fixtures from real repository history.
+- Refactored the CLI tool to use proper command-line options.
+
+### 1.0.4
+
+- Simplified documentation hosting: dropped GitHub Pages in favour of a single README.
+
+### 1.0.3
+
+- Improved the documentation workflow (dependencies, validation, `.gitignore`).
+
+### 1.0.2
+
+- Fixed the NuGet package README path so package documentation renders correctly.
+
+### 1.0.1
+
+- Unified and updated the README; fixed NuGet documentation packaging.
+
+### 1.0.0
+
+- First stable release.
+- Self-versioning bootstrap: the tool now computes and applies its own version during its own CI build.
+- Added a full documentation site (MkDocs, published to GitHub Pages).
+- Added the MIT license and NuGet package metadata (license, README).
+
+### 0.0.1 – 0.0.5
+
+- Initial project scaffolding: solution structure, MSBuild task, and CLI tool.
+- Iterated on NuGet package versioning and CI build configuration until packaging was reliable across multi-target builds.
