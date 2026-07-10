@@ -59,13 +59,23 @@ public static class GitInfoGatherer
     private static int GetBranchAwareDistance(string repoRoot, string branchName, int distanceFromTag)
     {
         if (branchName.StartsWith("release/", StringComparison.OrdinalIgnoreCase))
-            return TryGetDistanceFromMergeBase(repoRoot, "develop") ?? distanceFromTag;
+        {
+            var mergeBaseDistance = TryGetDistanceFromMergeBase(repoRoot, "develop");
+            // Only use merge-base distance when it is smaller than the tag distance,
+            // so that a tag placed on the branch itself always takes precedence.
+            if (mergeBaseDistance.HasValue && mergeBaseDistance.Value < distanceFromTag)
+                return mergeBaseDistance.Value;
+            return distanceFromTag;
+        }
 
         if (branchName.StartsWith("hotfix/", StringComparison.OrdinalIgnoreCase))
         {
             var hotfixDistance = TryGetDistanceFromMergeBase(repoRoot, "main")
                                  ?? TryGetDistanceFromMergeBase(repoRoot, "master");
-            return hotfixDistance ?? distanceFromTag;
+            // Only use merge-base distance when it is smaller than the tag distance.
+            if (hotfixDistance.HasValue && hotfixDistance.Value < distanceFromTag)
+                return hotfixDistance.Value;
+            return distanceFromTag;
         }
 
         return distanceFromTag;
