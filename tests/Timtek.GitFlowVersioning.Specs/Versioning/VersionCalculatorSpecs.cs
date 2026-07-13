@@ -8,7 +8,7 @@ class With_git_commit_info_builder
     protected static GitCommitInfo CommitInfo = null!;
     protected static VersionInfo Result = null!;
 
-    protected static GitCommitInfo BuildCommitInfo(string branchName, string baseTag = "1.2.3", int distance = 0, string exactPrereleaseTag = "")
+    protected static GitCommitInfo BuildCommitInfo(string branchName, string baseTag = "1.2.3", int distance = 0, string exactPrereleaseTag = "", int totalCommitCount = 0)
         => new GitCommitInfo
         {
             Sha = "abcdef1234567890abcdef1234567890abcdef12",
@@ -16,7 +16,8 @@ class With_git_commit_info_builder
             BaseVersionTag = baseTag,
             CommitDistance = distance,
             HasTag = true,
-            ExactPrereleaseTag = exactPrereleaseTag
+            ExactPrereleaseTag = exactPrereleaseTag,
+            TotalCommitCount = totalCommitCount
         };
 }
 
@@ -47,7 +48,7 @@ class when_computing_version_for_main_branch_5_commits_ahead_of_tag : With_git_c
 [Subject(typeof(VersionCalculator), "develop branch")]
 class when_computing_version_for_develop_branch : With_git_commit_info_builder
 {
-    Establish context = () => CommitInfo = BuildCommitInfo("develop", "1.2.3", distance: 7);
+    Establish context = () => CommitInfo = BuildCommitInfo("develop", "1.2.3", distance: 7, totalCommitCount: 7);
     Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
     It should_have_minor_bumped = () => Result.Minor.ShouldEqual("3");
     It should_have_patch_zero = () => Result.Patch.ShouldEqual("0");
@@ -61,7 +62,7 @@ class when_computing_version_for_develop_branch : With_git_commit_info_builder
 [Subject(typeof(VersionCalculator), "release branch")]
 class when_computing_version_for_release_branch : With_git_commit_info_builder
 {
-    Establish context = () => CommitInfo = BuildCommitInfo("release/1.3.0", "1.2.3", distance: 3);
+    Establish context = () => CommitInfo = BuildCommitInfo("release/1.3.0", "1.2.3", distance: 3, totalCommitCount: 3);
     Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
     It should_use_branch_version_as_base = () => Result.MajorMinorPatch.ShouldEqual("1.3.0");
     It should_have_beta_prerelease_label = () => Result.PreReleaseLabel.ShouldEqual("beta");
@@ -83,7 +84,7 @@ class when_computing_version_for_release_branch_without_semver_suffix : With_git
 [Subject(typeof(VersionCalculator), "hotfix branch")]
 class when_computing_version_for_hotfix_branch : With_git_commit_info_builder
 {
-    Establish context = () => CommitInfo = BuildCommitInfo("hotfix/fix-critical", "1.2.3", distance: 2);
+    Establish context = () => CommitInfo = BuildCommitInfo("hotfix/fix-critical", "1.2.3", distance: 2, totalCommitCount: 2);
     Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
     It should_have_beta_prerelease_label = () => Result.PreReleaseLabel.ShouldEqual("beta");
     It should_have_prerelease_number_2 = () => Result.PreReleaseNumber.ShouldEqual("2");
@@ -95,7 +96,7 @@ class when_computing_version_for_hotfix_branch : With_git_commit_info_builder
 [Subject(typeof(VersionCalculator), "feature branch")]
 class when_computing_version_for_feature_branch : With_git_commit_info_builder
 {
-    Establish context = () => CommitInfo = BuildCommitInfo("feature/my-feature", "1.2.3", distance: 10);
+    Establish context = () => CommitInfo = BuildCommitInfo("feature/my-feature", "1.2.3", distance: 10, totalCommitCount: 10);
     Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
     It should_have_alpha_prerelease_label = () => Result.PreReleaseLabel.ShouldEqual("alpha");
     It should_have_prerelease_number_10 = () => Result.PreReleaseNumber.ShouldEqual("10");
@@ -194,4 +195,35 @@ class when_develop_branch_has_a_matching_exact_prerelease_tag : With_git_commit_
     Establish context = () => CommitInfo = BuildCommitInfo("develop", "1.2.0", distance: 4, exactPrereleaseTag: "1.3.0-rc.1");
     Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
     It should_ignore_the_tag_override_on_non_release_branches = () => Result.SemVer.ShouldEqual("1.3.0-alpha.4");
+}
+
+[Subject(typeof(VersionCalculator), "weighted assembly version is tag-movement independent")]
+class when_a_prerelease_tag_is_force_moved_forward_on_a_release_branch : With_git_commit_info_builder
+{
+    // Simulates: a 6.3.0-rc.1 tag is force-moved to a later commit without renaming it.
+    // CommitDistance resets to 0 relative to the tag, and the tag's own embedded number ("1")
+    // is unchanged, but 5 more commits have actually happened since the previous build.
+    Establish context = () => CommitInfo = BuildCommitInfo("release/6.3.0", "6.2.0", distance: 3, totalCommitCount: 8);
+    Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
+    It should_derive_the_weighted_revision_from_total_commit_count_not_distance = () => Result.AssemblySemVer.ShouldEqual("6.3.0.30008");
+}
+
+[Subject(typeof(VersionCalculator), "weighted assembly version is tag-movement independent")]
+class when_the_exact_prerelease_override_tag_is_force_moved_to_a_later_commit : With_git_commit_info_builder
+{
+    // Simulates: the same "6.3.0-rc.1" tag is force-moved to a new commit. The label/number
+    // parsed from the tag text is unchanged ("rc.1"), but total commit count has increased,
+    // and the weighted AssemblySemVer revision must reflect that increase so ClickOnce detects an update.
+    Establish context = () => CommitInfo = BuildCommitInfo("release/6.3.0", "6.2.0", distance: 0, exactPrereleaseTag: "6.3.0-rc.1", totalCommitCount: 12);
+    Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
+    It should_still_use_the_tag_verbatim_as_semver = () => Result.SemVer.ShouldEqual("6.3.0-rc.1");
+    It should_derive_the_weighted_revision_from_total_commit_count = () => Result.AssemblySemVer.ShouldEqual("6.3.0.30012");
+}
+
+[Subject(typeof(VersionCalculator), "weighted assembly version is tag-movement independent")]
+class when_two_builds_on_the_same_release_branch_have_increasing_total_commit_counts : With_git_commit_info_builder
+{
+    Establish context = () => CommitInfo = BuildCommitInfo("release/6.3.0", "6.2.0", distance: 3, totalCommitCount: 20);
+    Because of = () => Result = VersionCalculator.Calculate(CommitInfo);
+    It should_produce_a_higher_revision_than_an_earlier_build_with_fewer_total_commits = () => Result.AssemblySemVer.ShouldEqual("6.3.0.30020");
 }

@@ -81,7 +81,7 @@ public static class VersionCalculator
         var patch = baseVersion.Build.ToString();
         var mmp = $"{major}.{minor}.{patch}";
         var preReleaseNumber = distance.ToString();
-        var weightedPreReleaseNumber = GetWeightedPreReleaseNumber(branchType, distance);
+        var weightedPreReleaseNumber = GetWeightedRevision(branchType, commitInfo.TotalCommitCount);
         var preReleaseTag = $"{label}.{preReleaseNumber}";
         var preReleaseTagWithDash = $"-{preReleaseTag}";
         var semVer = $"{mmp}{preReleaseTagWithDash}";
@@ -161,7 +161,7 @@ public static class VersionCalculator
         var fullBuildMetaData = $"{buildMetaData}.Branch.{branchName}.Sha.{sha}";
         var fullSemVer = $"{semVer}+{buildMetaData}";
         var informationalVersion = $"{semVer}+{fullBuildMetaData}";
-        var weightedRevision = PreReleaseWeightCalculator.GetWeight(BranchType.Release) + (int.TryParse(number, out var parsedNumber) ? parsedNumber : 0);
+        var weightedRevision = PreReleaseWeightCalculator.GetWeight(BranchType.Release) + commitInfo.TotalCommitCount;
 
         return new VersionInfo
         {
@@ -197,8 +197,8 @@ public static class VersionCalculator
     private static string BuildAssemblyVersion(string major, string minor, string patch, int revision) =>
         $"{major}.{minor}.{patch}.{revision}";
 
-    private static int GetWeightedPreReleaseNumber(BranchType branchType, int preReleaseNumber) =>
-        PreReleaseWeightCalculator.GetWeight(branchType) + preReleaseNumber;
+    private static int GetWeightedRevision(BranchType branchType, int totalCommitCount) =>
+        PreReleaseWeightCalculator.GetWeight(branchType) + totalCommitCount;
 
     private static string TruncateSha(string sha) =>
         sha.Length >= 7 ? sha.Substring(0, 7) : sha;

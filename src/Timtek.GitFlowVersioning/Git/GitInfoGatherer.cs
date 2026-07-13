@@ -22,6 +22,7 @@ public static class GitInfoGatherer
         var (baseTag, distanceFromTag, hasTag) = GetVersionFromDescribe(repoRoot);
         var distance = GetBranchAwareDistance(repoRoot, branchName, distanceFromTag);
         var exactPrereleaseTag = GetExactPrereleaseTagAtHead(repoRoot);
+        var totalCommitCount = GetTotalCommitCount(repoRoot);
 
         return new Versioning.GitCommitInfo
         {
@@ -30,8 +31,26 @@ public static class GitInfoGatherer
             BaseVersionTag = baseTag,
             CommitDistance = distance,
             HasTag = hasTag,
-            ExactPrereleaseTag = exactPrereleaseTag
+            ExactPrereleaseTag = exactPrereleaseTag,
+            TotalCommitCount = totalCommitCount
         };
+    }
+
+    /// <summary>
+    /// Gets the total number of commits reachable from HEAD. Unlike tag-relative distance, this value
+    /// is unaffected by tags being moved, so it always increases with each new commit.
+    /// </summary>
+    private static int GetTotalCommitCount(string repoRoot)
+    {
+        try
+        {
+            var countText = GitCommandRunner.RunCommand("rev-list --count HEAD", repoRoot);
+            return int.TryParse(countText, out var count) ? count : 0;
+        }
+        catch
+        {
+            return 0;
+        }
     }
 
     private static string NormalizeBranchName(string branchName)
