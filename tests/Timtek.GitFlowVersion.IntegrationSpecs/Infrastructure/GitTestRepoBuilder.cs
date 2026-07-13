@@ -39,6 +39,13 @@ internal sealed class GitTestRepoBuilder : IDisposable
         return this;
     }
 
+    /// <summary>Force-moves an existing tag to the current HEAD, as if re-tagging without renaming.</summary>
+    public GitTestRepoBuilder WithTagMovedHere(string tagName)
+    {
+        RunGit($"tag -f {tagName}");
+        return this;
+    }
+
     /// <summary>Creates the specified number of commits on the current branch.</summary>
     public GitTestRepoBuilder WithCommits(int count, string messagePrefix = "Commit")
     {

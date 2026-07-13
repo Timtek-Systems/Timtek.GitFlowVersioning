@@ -29,7 +29,8 @@ The table below lists the expected `SemVer` output for all supported branch mode
 ## Complete Variable Reference
 
 The following example assumes a repository on the `develop` branch with the most recent
-tag `1.2.0` and 5 commits since that tag, at commit `a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2`.
+tag `1.2.0` and 5 commits since that tag, at commit `a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2`,
+with 8 total commits reachable from `HEAD` in the whole repository.
 
 | Variable | MSBuild Property | Example Value | Description |
 |---|---|---|---|
@@ -51,8 +52,8 @@ tag `1.2.0` and 5 commits since that tag, at commit `a1b2c3d4e5f6a1b2c3d4e5f6a1b
 | `BuildMetaData` | `_GFV_BuildMetaData` | `5` | Commit distance as build metadata |
 | `FullBuildMetaData` | `_GFV_FullBuildMetaData` | `5.Branch.develop.Sha.a1b2c3d...` | Full build metadata string |
 | `InformationalVersion` | `_GFV_InformationalVersion` | `1.3.0-alpha.5+5.Branch.develop.Sha.a1b2c3d...` | Complete informational version |
-| `AssemblySemVer` | `_GFV_AssemblySemVer` | `1.3.0.5` | Four-part assembly version using a weighted prerelease revision |
-| `AssemblySemFileVer` | `_GFV_AssemblySemFileVer` | `1.3.0.5` | Four-part file version using a weighted prerelease revision |
+| `AssemblySemVer` | `_GFV_AssemblySemVer` | `1.3.0.8` | Four-part assembly version using a weighted revision (branch-type weight + total commit count) |
+| `AssemblySemFileVer` | `_GFV_AssemblySemFileVer` | `1.3.0.8` | Four-part file version using a weighted revision (branch-type weight + total commit count) |
 
 ## Standard MSBuild Properties
 

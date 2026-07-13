@@ -29,6 +29,13 @@ internal sealed class VersionComputationBuilder : IDisposable
         return this;
     }
 
+    /// <summary>Force-moves an existing tag to the current HEAD, as if re-tagging without renaming.</summary>
+    public VersionComputationBuilder WithTagMovedHere(string tagName)
+    {
+        repo.WithTagMovedHere(tagName);
+        return this;
+    }
+
     /// <summary>Creates the specified number of commits on the current branch.</summary>
     public VersionComputationBuilder WithCommits(int count, string messagePrefix = "Commit")
     {
