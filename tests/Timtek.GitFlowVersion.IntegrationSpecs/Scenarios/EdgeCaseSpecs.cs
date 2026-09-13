@@ -89,6 +89,18 @@ class when_a_legacy_v_prefixed_tag_is_farther_than_a_bare_tag : With_end_to_end_
 }
 
 [Subject("Edge case integration")]
+class when_v_prefixed_and_bare_tags_are_at_equal_distance : With_end_to_end_version_computation
+{
+    Establish context = () => Context = Builder
+        .WithInitialCommit()
+        .WithTag("v1.0.0")
+        .WithTag("1.1.0")
+        .Build();
+
+    It should_choose_the_higher_semantic_version = () => Context.Result.SemVer.ShouldEqual("1.1.0");
+}
+
+[Subject("Edge case integration")]
 class when_a_non_semver_tag_is_nearer_than_a_valid_release_tag : With_end_to_end_version_computation
 {
     Establish context = () => Context = Builder
