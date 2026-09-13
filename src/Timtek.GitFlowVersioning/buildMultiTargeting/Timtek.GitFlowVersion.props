@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
-    <!-- We generate assembly info ourselves -->
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <!-- Disable only the version attributes we generate ourselves, so the SDK continues to
+         emit all other standard assembly attributes (AssemblyConfiguration, AssemblyCompany,
+         AssemblyProduct, etc.) from project properties as normal. -->
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
