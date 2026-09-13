@@ -152,6 +152,8 @@ public static class GitInfoGatherer
 
     private static (string baseTag, int distance, bool hasTag) GetVersionFromDescribe(string repoRoot)
     {
+        var candidates = new List<(string baseTag, int distance, bool hasTag)>();
+
         foreach (var pattern in GitGlobVersionTagPatterns)
         {
             try
@@ -159,12 +161,20 @@ public static class GitInfoGatherer
                 var describeOutput = GitCommandRunner.RunCommand($"""describe --tags --long --match "{pattern}" HEAD""", repoRoot);
                 var parsed = ParseDescribeOutput(describeOutput);
                 if (IsSemanticVersionTag(parsed.baseTag))
-                    return parsed;
+                    candidates.Add(parsed);
             }
             catch
             {
                 // pattern did not match any reachable tag; try next pattern
             }
+        }
+
+        if (candidates.Count > 0)
+        {
+            return candidates
+                .OrderBy(candidate => candidate.distance)
+                .ThenByDescending(candidate => Version.Parse(candidate.baseTag))
+                .First();
         }
 
         var nearestSemanticTag = TryGetNearestSemanticVersionTag(repoRoot);

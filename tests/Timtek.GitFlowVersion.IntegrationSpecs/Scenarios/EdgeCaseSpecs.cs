@@ -74,6 +74,21 @@ class when_only_ci_build_tags_exist_with_no_semver_release_tag : With_end_to_end
 }
 
 [Subject("Edge case integration")]
+class when_a_legacy_v_prefixed_tag_is_farther_than_a_bare_tag : With_end_to_end_version_computation
+{
+    // Reproduces Timtek-Systems/Timtek.GitFlowVersioning#13: a stray v-prefixed tag far behind HEAD
+    // must not win over a nearer bare-numeric tag just because its glob pattern is tried first.
+    Establish context = () => Context = Builder
+        .WithInitialCommit()
+        .WithTag("v1.3.2")
+        .WithCommits(3)
+        .WithTag("3.0.1")
+        .Build();
+
+    It should_use_the_nearer_bare_tag = () => Context.Result.SemVer.ShouldEqual("3.0.1");
+}
+
+[Subject("Edge case integration")]
 class when_a_non_semver_tag_is_nearer_than_a_valid_release_tag : With_end_to_end_version_computation
 {
     Establish context = () => Context = Builder
