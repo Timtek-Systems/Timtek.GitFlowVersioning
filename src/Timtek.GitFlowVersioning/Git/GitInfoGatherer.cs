@@ -171,10 +171,11 @@ public static class GitInfoGatherer
 
         if (candidates.Count > 0)
         {
-            return candidates
+            var nearestCandidate = candidates
                 .OrderBy(candidate => candidate.distance)
                 .ThenByDescending(candidate => Version.Parse(candidate.baseTag))
                 .First();
+            return nearestCandidate;
         }
 
         var nearestSemanticTag = TryGetNearestSemanticVersionTag(repoRoot);
