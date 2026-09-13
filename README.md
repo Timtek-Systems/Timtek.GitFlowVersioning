@@ -180,6 +180,11 @@ Full documentation lives in the Obsidian vault at [`docs/Timtek.GitFlowVersion/`
 
 ## Release Notes
 
+### 3.2.1
+
+- **Fix**: When a tag with prefix `v` was found, it was always used as the version root even if a nearer tag without a 'v' prefix existed.
+- Versioning gap due to GitHub CI computing the wrong version.
+
 ### 3.1.0
 
 - **Release branch tag override**: tagging a commit on a `release/*` branch with a full prerelease SemVer (e.g. `6.3.0-rc.1`) now uses that tag verbatim as the version for that exact commit — handy for promoting a `-beta` build to a `-rc` build for testers. The override applies only to that tagged commit; the next commit reverts automatically to normal `beta.N` numbering.
