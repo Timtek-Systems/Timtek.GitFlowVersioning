@@ -161,7 +161,10 @@ public static class GitInfoGatherer
                 var describeOutput = GitCommandRunner.RunCommand($"""describe --tags --long --match "{pattern}" HEAD""", repoRoot);
                 var parsed = ParseDescribeOutput(describeOutput);
                 if (IsSemanticVersionTag(parsed.baseTag))
+                {
+                    _ = Version.Parse(parsed.baseTag);
                     candidates.Add(parsed);
+                }
             }
             catch
             {

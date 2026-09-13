@@ -101,3 +101,16 @@ class when_a_non_semver_tag_is_nearer_than_a_valid_release_tag : With_end_to_end
     It should_ignore_the_nearer_non_semver_tag = () => Context.Result.PreReleaseLabel.ShouldBeEmpty();
     It should_fall_back_to_the_nearest_valid_release_tag = () => Context.Result.SemVer.ShouldEqual("1.0.2");
 }
+
+[Subject("Edge case integration")]
+class when_a_nearer_tag_has_unparseable_semver_numeric_components : With_end_to_end_version_computation
+{
+    Establish context = () => Context = Builder
+        .WithInitialCommit()
+        .WithTag("v1.2.3")
+        .WithCommits(1)
+        .WithTag("999999999999.0.0")
+        .Build();
+
+    It should_ignore_the_unparseable_tag = () => Context.Result.SemVer.ShouldEqual("1.2.4");
+}
