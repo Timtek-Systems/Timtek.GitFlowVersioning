@@ -180,6 +180,14 @@ Full documentation lives in the Obsidian vault at [`docs/Timtek.GitFlowVersion/`
 
 ## Release Notes
 
+### 3.3.1
+
+- Change to GitHub Actions CI workflow to use NuGet trusted publishing. No more secrets!
+
+### 3.3.0
+
+- Handle ClickOnce application versioning by default instead of requiring the user to configure it.
+
 ### 3.2.1
 
 - **Fix**: When a tag with prefix `v` was found, it was always used as the version root even if a nearer tag without a 'v' prefix existed.
