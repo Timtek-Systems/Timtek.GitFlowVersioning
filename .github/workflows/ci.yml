@@ -15,6 +15,9 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # lets NuGet/login exchange the GitHub OIDC token for a short-lived NuGet API key
 
     steps:
       - name: Checkout
@@ -118,7 +121,14 @@ jobs:
             echo "on_main=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: NuGet login (OIDC to temporary API key)
+        id: nuget-login
+        if: steps.check-main.outputs.on_main == 'true'
+        uses: NuGet/login@v1
+        with:
+          user: NameOfTheDragon
+
       - name: Push to NuGet.org
         if: steps.check-main.outputs.on_main == 'true'
-        run: dotnet nuget push "nupkgs/*.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+        run: dotnet nuget push "nupkgs/*.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} --skip-duplicate
 
