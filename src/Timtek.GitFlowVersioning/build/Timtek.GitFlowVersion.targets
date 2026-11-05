@@ -64,4 +64,19 @@
       <Compile Include="$(_GFV_AssemblyInfoFile)" Condition="'$(_GFV_AssemblyInfoFile)' != ''" />
     </ItemGroup>
   </Target>
+
+  <!-- ClickOnce takes its version from ApplicationVersion/ApplicationRevision, which Visual Studio
+       writes into the publish profile (typically 0.0.0.0). Properties set inside a target override
+       those written during evaluation, so no configuration is needed. Global properties passed with
+       /p: are never overridden by MSBuild, so an explicit CI override still wins.
+       IsRevisionIncremented is switched off so Visual Studio doesn't increment the revision after publishing. -->
+  <Target Name="_SetGitFlowClickOnceVersion"
+          AfterTargets="_ComputeGitFlowVersion"
+          Condition="'$(_GFV_AssemblySemFileVer)' != '' And ('$(PublishProtocol)' == 'ClickOnce' Or '$(GenerateClickOnceManifests)' == 'true')">
+    <PropertyGroup>
+      <ApplicationVersion>$(_GFV_AssemblySemFileVer)</ApplicationVersion>
+      <ApplicationRevision>$(_GFV_AssemblySemFileVer.Split('.')[3])</ApplicationRevision>
+      <IsRevisionIncremented>false</IsRevisionIncremented>
+    </PropertyGroup>
+  </Target>
 </Project>
