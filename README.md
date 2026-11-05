@@ -180,6 +180,10 @@ Full documentation lives in the Obsidian vault at [`docs/Timtek.GitFlowVersion/`
 
 ## Release Notes
 
+### 3.3.3
+
+Fix an obscure bug that leads to incorrect transitive dependencies generated through project references.
+
 ### 3.3.1
 
 - Change to GitHub Actions CI workflow to use NuGet trusted publishing. No more secrets!
