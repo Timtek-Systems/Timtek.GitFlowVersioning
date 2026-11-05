@@ -12,9 +12,12 @@
              AssemblyFile="$(_GitFlowVersioningTaskAssembly)"
              Condition="'$(_GitFlowVersioningTaskAssembly)' != '' And Exists('$(_GitFlowVersioningTaskAssembly)')" />
 
-  <!-- Runs during inner per-TFM builds for compile-time versioning -->
+  <!-- Runs during inner per-TFM builds for compile-time versioning.
+       _GetProjectVersion is how NuGet pack queries a ProjectReference for the version to declare as a
+       package dependency. It does not compile, so without this hook the dependency is declared as the
+       SDK default 1.0.0. -->
   <Target Name="_ComputeGitFlowVersion"
-          BeforeTargets="CoreCompile;GenerateAssemblyInfo;BeforeBuild"
+          BeforeTargets="CoreCompile;GenerateAssemblyInfo;BeforeBuild;_GetProjectVersion"
           Condition="'$(GitFlowVersioningEnabled)' == 'true' And '$(DesignTimeBuild)' != 'true' And '$(_GitFlowVersioningTaskAssembly)' != ''">
 
     <MakeDir Directories="$(IntermediateOutputPath)" />
